@@ -1,0 +1,235 @@
+3.1) Review
+
+	- We can represent vectors as a matrix
+	- We use matrix multiplication to perform transformations.
+	- Multiplying by the identity matrix has no effect
+	- Translation, Rotation (Z rotate), Scale
+	[1 0 0 Tx]       [cos0 -sin0 0 0]   [Sx 0  0 0]
+	[0 1 0 Ty]		 [sin0  cos0 0 0]   [0  Sy 0 0]
+	[0 0 1 Tz]		 [  0    0   1 0]   [0  0 Sz 0]
+	[0 0 0  1]		 [  0    0   0 1]   [0  0  0 1]
+
+	- Vertex Shader applies the matrix we provide to every vertex in
+		our model.
+		modelMatrix = glm::mat4(1.0f);
+		modelMatrix = glm::translate(modelMatrix, 
+			glm::vec3(3.0f, 2.0f, 0.0f));
+		program.setModelMatrix(modelMatrix);
+
+3.2)
+
+	- Multiplying matrices combines their transformations. 
+		(You can combine a translation and rotation into one matrix)
+	- Order matters (not communitive).
+	- Rotating and translating is very different from translating and rotating
+
+3.3)
+
+	- Model Space (each sprite has its own origin)
+	- World Space (where the characters are goin has it's own origin too)
+	- We are transforming from model space to world space
+
+3.4)
+	
+	- Game setting are dynamic (always moving)
+	- One way to keep up with this is to initialize the model matrix and
+		the change the matrix every frame (NO YOU DONT WANT TO)
+	- Instead you want to keep track of position, rotation and scale
+		in variables and set up the marix as needed. (player_x)
+	- Then you can update the matrix by the variables instead of updating
+		the matrix all together.
+
+3.5) Timing and FPS
+
+	- Things should happen in our games at the same speeds regardless of
+		how fast or slow the user's hardware is. (Just because
+		someone's machine is faster, one shouldn't be able to shoot faster)
+	- Faster hardware does more updates than slower hardware. (This could
+		be bad if someone run faster because they have a 60 fps computer
+		instead of a 30 fps computer.)
+	- You can accomodate for this with delta time
+
+3.6) deltatime
+
+	- How we handle different framerates. The amount of time that has passed
+		since the last frame. On diff computers, it will have diff deltatime
+	- 60 fps: 16.66ms / 1000 = 0.0166 (deltatime)
+	- 30 fps: 33.33ms / 1000 = 0.0333 (deltatime)
+	- You need to travel one unit per second. 
+	- We need to use deltatime whenever handling rotation as well, otherwise
+		you could rotate twice as fast. 
+	//Rotate 45 degrees per second
+	rotate_z += 45.0f * deltaTime;
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(rotate_z), 
+		glm::vec3(0.0f, 0.0f, 1.0f));
+
+3.7)
+	
+	- You may have noticed in our code
+		projectionMatrix = glm::ortho(~); 
+		
+		Whats important here is the word ortho and it stands for orthographic
+	- Persepctive view vs. Orthographic view.
+		- Persepctive view looks like things get smaller as they get farther away
+		- Orthographic view looks like everything is the same size even if 
+			they are further away. (we will be using this)
+	- Window resolution: 640 / 480 = 1.3333
+	- Orthographic view: 10 / 7.5 = 1.3333
+	- They need to have the same ratio or else things will look weird.
+	- So if you can see 10 units across, then you need to only be able to see 7.5
+		units up. If you double these numbers, you can see a greataer persepctive
+		(as if youre farther away.) Vice versa if you halve it.
+
+
+3.11) Color and Textures
+
+	- Instead of values 0-255, OpenGL colors have 3 or 4 channels ranging from 0.0 to 1.0
+		RGB or RGBA. If something is 1.0, then it is solid, if it is 0.0 then it is invisible
+	- Start with a clear screen each frame.
+	- glClearColor, sets what color to use when clearing the screen.
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // red green blue
+	- glClear actually clears the screen using the color from glClearColor.
+	- If you need a blue sky, you can use a clear color. Basically another background color.
+
+
+3.12) SetColor
+
+	- Setting a solid color of an untextured polygon. 
+	- ShaderProgram::SetColor, sets what color touse when frawing a polygon
+	- program.setColor(1.of, o.of, 0.0f, 1.0f);
+
+
+3.13) Textures
+
+	- Loading and preparing textures/images
+	- You do this during your setup or initilization, not every frame! You send the iamge to the
+		video card. You do this ahead of time so you don't send an image every grame.
+	- You load an image off of the drive and into the RAM, then from RAM 
+		and into the video card RAM and then give it an ID number. 
+		and then when you come across the image again it will call by its ID number.
+
+
+3.14) STB_Image
+
+	- You must include STB_IMAGE_IMPLEMENTATION in one of the files you are including it from.
+
+	#define STB_IMAGE_IMPLEMENTATION
+	#include "stb_image.h"
+	
+	//use stbi_load to load the pixel data from an image file
+
+	int w, h, n;
+	unsigned char* image = stbi_load("pacman.png", &w, &h, &n, STBI_rgb_alpha);
+
+	//After you are done loading the image data, you must free it
+
+	stbi_image_free(image);
+
+
+3.15) Creating a texture
+
+	- Create a texture ID
+	Gluint textureID; 
+	glGenTextures(1, &textureID);
+	- Binding a texture, basically gives the texture we are going to make the texture ID
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	//GL_TEXTURE_2D is a "target"
+	//Next slide will make this make sense...
+
+	- Setting the texture pixel data. This is what sends the image from our memory onto the graphics card
+	//Our images must be RGBA
+
+	glTextImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+
+3.16) Texture filtering
+
+	- You might have an original size of the image but you can minimize it or magnify it.
+	- To do this it is going to have to fill in some information
+	- Linear (good for high resolution textures and textures with anti-aliasing)
+	- Nearest neighbor (good for pixel art, it makes things look pixelated) probably use this one
+	- Texture filtering settings
+
+	//use GL_LINEAR OR GL_NEAREST
+	// MIN = minifying, MAG = magnifying
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	- Now lets make that into a function
+
+	GLuint LoadTexture(const char* filePath) { //returns ID number of a texture
+		int w, h, n;
+		unsigned char* image = stbi_load(filePath, &w, &h, &n, STBI_rgb_alpha); //loading the png file off the hard drive and into ram
+
+		if(image == NULL){
+			std::cout << "unable to load image. Make sure the path is correct\n";
+			assert(false);
+		}
+
+		Gluint textureID; 
+		glGenTextures(1, &textureID); //create the texture ID
+		glBindTexture(GL_TEXTURE_2D, textureID); //now bind that texture ID
+	
+		glTextImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image); //here is the raw pixel data, put it onto the video card and heres the id number
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); //use the nearest filter
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		stbi_image_free(image); //freeing from our main memory since it's already on the video card memory
+		return textureID: //now it returns the texture id
+	}
+
+	
+
+3.17) Texture coordinates
+
+	- Now that the texture is loaded, we can apply it to our models, as we draw each frame.
+	- Texture coordinates are referred to as UV coordinates, the range is from 0.0 to 1.0, and
+		not by pixels.
+
+	- Our 2D sprites are made of two triangles that make up a square.
+	- Need to match up the vertices to the UV coordinates.
+	float vertices[] = ~
+	float texCoords[] = ~
+
+
+3.18) How do we code that
+
+	- We need to get a shader that can fill in those things in
+	- Now we need to load the shader that can handle textured polygons, not just the solid color
+		like we did before.
+
+	GLuint playerTextureID:
+	void Initialize()
+	{
+		//Load the shaders for handling textures!
+		program.load("shaders/vertex_textured.glsl", "shaders/fragment_textured.glsl");
+
+		//Load our player image
+		playerTextureID = LoadTexture("player.png");
+	}
+
+	- Rendering 
+	//GL clear to set the background
+	//set the model matrix
+	//set the coordinates for those two triangles.
+	//load the textures to those triangles
+	//bind the texture to the ID and then draw it
+	//then swap it to the window which basically means push it out to the window.
+
+
+3.19) Blending
+
+	- Blending is off by default, but we need to enable it so that our images are transparent.
+	glEnable(GL_BLEND);
+
+	//good for setting for transparency
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+
+3.20) Image Loading
+
+	- If your image doesn't load...
+	- In visual studio, use the file explorer to copy images into your project's folder.

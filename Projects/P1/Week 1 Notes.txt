@@ -1,0 +1,75 @@
+Week One
+
+1.3) What is a game?
+
+    - The heart of Game Programming:
+
+    Startup();
+    while(gameIsRunning) {
+        ProcessInput();
+        Update();
+        Render();
+    }
+    Shutdown();
+
+1.4) Video Game Programming History
+
+    - Old Video Games were written in assembly
+
+1.5) OpenGL and SDL
+
+    - In this course, we will be working with SDL, OpenGL, and C++.
+    - What is SDL?
+        - Layer on top of OpenGL
+        - Window Management, Input, Events, Audio, Game controllers.
+        - OpenGL provides graphics, not anything else.
+    - SDL in the real world
+        - Team Fortress 2, noth take advantage of OpenGL and are 
+            powered bySDL
+ 
+ 1.12) Software Rendering
+
+    - So at first, what would happen is that these programmers would write a lot of code/software
+        in order to simulate 3D or 2D motion. The CPU would run the code, the scene would be 
+        built into the RAM and then put onto the video card. So basically, 
+        the computer is doing a lot just for one small little animation to be
+        done. The next step after this would be to dedicate another piece of hardware to do 
+        all of this for you, instead of relying on the RAM and the CPU. This is known as the
+        graphics card.
+
+ 1.13) Hardware Rendering
+
+    - So where we are now is what we call hardware rendering, made possible by graphics cards.
+        Graphics card provide a separate piece of hardware specifically for graphics, and hold
+        its own RAM. So your main CPU and RAM are available to do other things, and the card
+        handles all of the math and geometry and textures needed to make the game run. Where we 
+        are going in the future is having separate headsets to help visually with the game.
+        This includes headsets with VR.
+
+1.14) How does this all work?
+
+    - The answer to this is triangles. All of it is triangles.You can pack more, smaller triangles
+        into something to make it seem more curved. Textures also help make the curvature of
+        something look more realistic. Textures are 2D images that you can get from anywhere and
+        basically paste onto the traingles. But you have to be very precise about which part of 
+        the image goes on which part of the triangle.
+    - Hardware rendering. Instead of every frame being given a picture to display at that very 
+        second. The game is instead loading the pictures and triangles that will be shown ahead of
+        time onto the graphics card's RAM. you are offloading from the regular CPU and RAM and 
+        giving it to the graphics card RAM. the graphics card does all of the work in order to 
+        build the scene wanted to be shown onto the computer.
+
+1.15) 2D is 3D
+
+    - This entire course we are going to be working with 2D. A 2D sprite is made up of 2 triangles.
+        Triangles in game programming will have a "front" which basically means you dedicate
+        which side is the front, by numbering the vertices. This makes it easier to tell the computer
+        which way to face the triangle. In conjunction with the triangles, there are texture 
+        coordinates. It is a square and its top left coordinate is 0,0, top right 1,0 bottom left 0,1
+        bottom right 1,1. Its basically like the IV quadrant of an x-y plane. You are always going
+        to be working from 0-1. Never with negatives in terms of textures. 
+    - Shaders!
+        Shaders are composed of vertex and fragment shaders. (V) You are giving the vertices and 
+        coordinates of the model. Basically all of the info for the object. And then the vertex 
+        shader translates this info and maps it. And then the second part (F), it determines which
+        pixel in the triangle gets what color.

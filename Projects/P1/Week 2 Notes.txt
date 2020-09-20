@@ -1,0 +1,126 @@
+================ Week 2 Notes ===============
+
+2.1)
+
+	A point is a location on a plane.
+
+2.2)
+
+	Vectors!!
+	- A point is a location (on an x-y plane, it can be the coordinates (4,3))
+	- A vector is a displacement ([4 3] is 4 across and three up from the origin)
+	- Vectors have a direction and magnitude (length). Like a distance from something
+	- We can add vectors together. (Ex: Go 10 that way and 5 that way). Points cannot
+		be added together.
+	- We can also multiply vectors by a scalar. It can be multiplied by 2 which will
+		double the length. Scale it up or down. The direction will stay the same.
+	- We can also rotate a vector, which means you can change the direction.
+		(Ex: Change [4 0] -> to [0 4] ^)
+
+2.3) Transformations
+
+	- Translations basically means moving something
+	- Rotations basically means rotating the object to face a different direction
+	- Scaling, basically means making it grow in size or shrink in size.
+
+
+2.4) Matrices!
+
+	- m-by-n Matrix (m rows-by-n columns). 2x3 matrix.
+	- We can treat a 2D vector as a 2x1 matrix. [4 3]
+	- Matrix operations:
+		- Matrix addition: add their corresponding entries (must be same size)
+			[A B] + [E F] = [A+E B+F]
+		- Matrix subtraction: subtract their corresponding entries (must be same size)
+			[A B] - [E F] = [A-E B-F]
+		- Scalar multiplication: multiply each entry by S
+			2 x [A B] = [2A 2B]
+
+2.5)
+
+	- Matrix Multiplication:
+		- The number of columns in the first matrix must match the number of 
+		rows in the second matrix.
+		- The result is the number of rows in the first matrix by the number of
+		columns in the second matrix.
+
+		[A B C] x [G H] = [? ?]
+		[D E F]   [I J]
+		          [K L]
+
+		  2x3   x  3x2  =  2x2 
+
+
+		[AxG + BxI + CxK   AxH + BxJ + CxL]
+		[DxG + ExI + FxK   DxH + ExJ + FxL] -> Lots of work per entry
+
+
+2.6)
+
+	- We can use matrix multiplication to transform things!
+	- Identity Matrix: An NxN matrix with 1 on the diagonal and 0 for the other
+		values. 1x1 = [1], 2x2 = [1 0], 3x3 = [1 0 0]
+								 [0 1]		  [0 1 0]
+											  [0 0 1]
+	- Multiplying by the identity matrix has no effect.
+	- From our example code: modelMatrix = glm::mat4(1.0f);
+		we initialized our triangle to the identity matrix.
+
+2.7)
+
+	- Scaling: Uniform or non-uniform. Uniform means keeping the shape the same,
+		but increasing or decreasing the size. Non-uniform means stretching or 
+		squashing, not maintaining the shape.
+	- Putting that into coding!
+		What we are going to do is transform the matrix that will transform the vertixes.
+		This matrix is used by the vertex shader.
+
+		//Start off with identity.
+		modelMatrix = glm::mat4(1.0f);
+
+		//Scale what we have so far.
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(2.0f, 2.0f, 1.0f));
+		//it is scaling along the x and y, not the z. Multiplied by 2x2
+
+2.8) Rotation
+
+	- [cos0 -sin0][X]   [cos0*X + -sin0*Y]
+	  [sin0  cos0][Y] = [sin0*X +  cos0*Y]
+	  Rotating things around the xy-axis.
+	  If theta is 180 degrees, it would flip the object
+
+	- Coding!
+
+		//Start off with identity.
+		modelMatrix = glm::mat4(1.0f);
+
+		//Rotate what we have so far.
+		modelMatrix = glm::rotate(modelMatrix, angle_in_radians,
+			glm::vec3(0.0f, 0.0f, 1.0f));
+
+		Multiplying the identity matrix by the rotation matrix, and then rotating
+		the object around the Z axis. (Imagine putting a pencil directly towards
+		the camera and then spinning what the pencil is poking through)
+
+2.9) Translation
+
+	- First we need to represent our 2D vector as a 3D vector (homogeneous coordinates)
+	- Translation vector [1 0 Tx][X]   [X + Tx]
+						 [0 1 Ty][Y] = [Y + Ty]
+						 [0 0  1][1]   [1     ]
+	- Start with identity and then multiply by the translation matrix.
+	- Coding!
+
+		//Start off with identity.
+		modelMatrix = glm::mat4(1.0f);
+
+		//Translate what we have so far.
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(3.0f, 2.0f, 0.0f));
+
+2.10) 
+
+	- mat4? You may have noticed our code uses 4x4 matrices. That's because 
+		everything is really 3D and we need to use Homogeneous Coordinates to 
+		transform 3D vectors. [X Y Z] -> [X Y Z 1]
+		Everything in OpenGL is in 3D, and sometimes you need to change it into 4D
+		so that it can translate.
