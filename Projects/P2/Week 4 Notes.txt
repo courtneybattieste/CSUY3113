@@ -1,0 +1,565 @@
+---------------- Week 4 ---------------
+
+1) Input Introduction
+
+	- Input is feedback from things like controllers, mouse, and keyboard. Other
+		input devices like dance/dance revolution (dance pad), Vr.
+	- However our games are going to be really simple like keyboard input or 
+		mouse input. We could do controller input later on but its optional.
+
+2) Keyboard Input Events
+
+	- In the game loop we have a processInput method
+		
+		Startup();
+		while (gameIsRunning) {
+			ProcessInput();
+			Update();
+			Render();
+		}
+		Shutdown();
+
+	- We're going to be working with the process input function today the most.
+
+		ProcessInput();
+
+		SDL_Event event;
+		while(SDL_PollEvent(&event)) {
+			if(event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
+				gameIsRunning = false;
+			}
+		}
+		
+	- we are going to be updating  the if else statement to a switch case in
+		order to account for many more different types of input.
+
+		switch(event.type) {
+			case SDL_QUIT;
+			case SDL_WINDOWEVENT_CLOSE;
+				gameIsRunning = false;
+				break;
+		}
+
+	- The first event that we are going to be looking for is the SDL_KEYDOWN.
+		keydown is when a key is pressed down as low as it can go
+		keyup is when a key is released from beingn pressed.
+
+		(there are times when you would want to use keyup, for example, if 
+			you are holding down something and want to let go of it at another
+			place on the screen, the key up button would allow you to know
+			when the player wants to release that object that it was holding
+			a key down to hold.)
+
+
+		//Check if a key was pressed.
+		case SDL_KEYDOWN:
+			switch(event.key.keysym.sym){
+				//.. now we are going to be looking for which key was it
+
+				case SDLK_RIGHT: //right arrow key
+					player_x += 1.
+					break;
+
+				case SDLK_SPACE: //space bar
+					PlayerJump();
+					break;
+			}
+			break;
+
+		- For more options on buttons, you can look for their names at
+			https://wiki.libsdl.org/SDL_Scancode
+
+		- So what we have above is a switch, looking for what happened (is a 
+			key pressed? did the mouse move?) and inside of that case, you
+			have another switch asking specifically what happened with that case 
+			(which specific key was it? where did the mouse move?)
+
+
+	- Now let's put it all together!
+
+		void ProcessInput(){
+			SDL_Event event;
+			while (SDL_PollEvent(&event)) {
+				switch (event.type) {
+					case SDL_QUIT:
+					case SDL_WINDOWEVENT_CLOSE: //both quit or close, stop game 
+						gameIsRunning = false;
+						break;
+
+					case SDL_KEYDOWN:
+						switch(event.key.keysym.sym){
+							//.. now we are going to be looking for which key was it
+						
+							case SDLK_LEFT: //Move the player left
+								player_x -= 1;
+								break;
+
+							case SDLK_RIGHT: //Move the player right
+								player_x += 1;
+								break;
+
+							case SDLK_SPACE: //Usually jump
+								PlayerJump();
+								break;
+						}
+						break; //SDL_KEYDOWN
+				}
+			}
+		}
+
+
+3) Keyboard Input State
+
+	- Now that we know how to check if a key has been pressed or a key has been
+		released, now we can ask, what is the current state of all of the keys?
+
+	- Now we can look at the state of all of the buttons with 
+		SDL_GetKeyboardState (0 means that a key is not pressed, 1 means it is).
+
+	- When SDL starts up, it creates an array that holds the state of each key, and
+		instead of freeing that memory, we should just look at it to see which
+		keys are pressed.
+
+	const Uint8 *keys = SDL_GetKeyboardState(NULL); //pointer to array
+
+	if(keys[SDL_SCANCODE_LEFT]) { //if the left key is down rn
+		PlayerLeft();
+	}
+
+	if(keys[SDL_SCANCODE_RIGHT]){
+		PlayerRight();
+	}
+
+	//Notice the above use SDL_SCANCODE_(for array) and not SDLK_ (used for events)
+
+
+
+4.4) Mouse Input
+
+	case SDL_MOUSEMOTION:
+		event.motion.x : x position in pixels
+		event.motion.y : y position in pixels
+		break;
+
+	case SDL_MOUSEBUTTONDOWN:
+		event.motion.x : x position in pixels
+		event.motion.y : y position in pixels
+		event.button.button : button that was clicked (1,2,3)
+		break;
+
+		gives you coordinates of where mouse was clicked and what button was pressed
+
+	// put this outside of "while (SDL_PollEvent(&event))"
+		int x, y;
+		SDL_GetMouseState(&x, &y);
+
+
+5) Mouse Coordinates and Pixels!
+
+	- Our window that we have been making our scenes in is 640 x 480 pixels.
+
+					640
+		x = 0  |-----------|
+		y = 0  |		   |480
+			   |		   |
+			   |-----------|x = 639
+							y = 479
+
+		Our window goes from top left to bottom right.
+
+
+	- We need to convert from pizel coordinates to OpenGL Units.
+
+	glm::ortho(-5.0f, 5.0f, -3.75f, 3.75f, -1.0f, 1.0f);
+
+				   pixels						ortho
+		  (0,0)|-----------|	(-5.0, 3.75)|-----------|				
+		       |           |				|     ^     |
+			   |		   |	  -->		|<----|---->|
+			   |		   |				|	  v	    |			
+			   |-----------|(639,479)		|-----------|(5.0, -3.75)
+							
+
+		//Convert mouse x, y to world unit x, y
+		//Assumes we are looking at 0,0 in our world
+
+		unit_x = ((x / width) * ortho_width) - (ortho_width / 2.0);
+		unit_y = (((height - y) / height) * ortho_height) - ortho_height / 2.0);
+
+
+
+6) Controller Input
+
+
+	-Initialization:
+		
+		SDL_Joystick *playerOneController;
+
+		void Initialize () {
+			
+			//Initialize video and the joystick subsystem
+			SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK); //in the future we'll add audio
+				
+			//Open the 1st controller found. Returns null on error.
+			playerOneController = SDL_JoystickOpen(0); //if null there is no controller
+
+			//Do the other stuff		
+		}
+
+	-Cleanup
+
+		SDL_JoystickClose(playerOneController);
+
+	-Checking for Controllers
+		You can SDL_NumJoysticks() to get the number of controllers.
+
+	-Axis and Button events
+		SDL_AXISMOTION (means one of the axis on the joystick has moved)
+		SDL_JOYBUTTONDOWN (when a button has been pushed down)
+		SDL_JOYBUTTONUP (when a button is released)
+
+	-Axes and Buttons
+		For XBOX controller (might be different on diff controller/system)
+
+		Axes:								Buttons:
+		0: Left stick - x axis				0: A			8: Start
+		1: left stick - y axis				1: B			9: Select
+		3: right stick - x axis				2: X			10: Home
+		4: right stick - y axis				3: Y			11: DPad up
+		2: left trigger						4: LB			12: DPad Down
+		5: right trigger					5: RB			13: DPad left
+											6: L3/LS		14: Dpad Right
+											7: R3/RS
+
+		- difference between axes and buttons is that for axes, it matters
+			how much you hold down the trigger (will make you either go faster
+			or slower depending on how much you press it down). This is the same
+			for how much you turn the stick to the left or to the right.
+			For buttons, it doesn't matter how soft or how hard you press it down,
+			it will go the same speed or do the same action regardless on that input.
+
+
+		-Code for this:
+
+			SDL_Event event;
+			while (SDL_PollEvent(&event)) {
+				switch (event.type) {
+					case SDL_QUIT:
+					case SDL_WINDOWEVENT_CLOSE: //both quit or close, stop game 
+						gameIsRunning = false;
+						break;
+
+					case SDL_JOYAXISMOTION:
+							//event.jaxis.which		: which controller/player (usually 0)
+							//event.jaxis.axis		: which axis moved (left or right)
+							//event.jaxis.value		: -32768 to 32767
+							break;
+					case SDL_JOYBUTTONDOWN:	
+						//event.jbutton.which		: Which controller (usually 0)
+						//event.jbutton.button		: which button was it
+						break;
+				}
+			}
+
+
+		-Similar to keyboard event, we need to know when someone is holding down a
+			button. (SDL_JOYAXISMOTION & SDL_JOYBUTTONDOWN doesnt do this)
+			(they would hold down a button maybe if they wanted to continuously fire
+				or if they were trying to continously spin pov to the right)
+
+			-Polling the Controller
+				- This is not an event, this is something that you put outside of the
+				while loop and it is called Polling the Controller.
+
+				Code:
+
+					SDL_JoystickGetAxis(playerOneController, axisIndex);
+					SDL_JoystickGetButton(playerOneController, buttonIndex);
+
+
+7) Movement
+
+	- The Game Loop
+		Startup();
+
+		while(gameIsRunning){
+			ProcessInput();
+			Update();
+			Render();
+		}
+
+		Shutdown();
+			
+
+		-ProcessInput()
+			Store the player's intent to move/jump/etc.
+			(capturing the intent that the player wants to move this way)
+			(Processinput gets input from the keyboard)
+
+		-Update()
+			Test/Apply movement
+			Player, enemies, moving platforms, etc.
+			(after capturing intent, we check if they can move that way
+				e.g. is there a wall in the way? or maybe an enemy?)
+			(it will then update the scenery, with player new location, enemies
+				and maybe moving platforms)
+
+		-Render()
+			Draw the current state of the game.
+			(render will then push/draw all of this data out onto the screen)
+
+	-How do we do this?
+		Vectors!
+
+		We can store the player's position as a vector as well as an intended movement
+
+		Code:
+			//Start at 0, 0, 0
+			glm::vec3 player_position = glm::vec3(0, 0, 0);
+
+			//dont go anywhere (yet) (stores how much they want to move)
+			glm::vec3 player_movement = glm::vec3(0, 0, 0); 
+
+
+			//---------------------------------
+			-Now set where we want to go in ProcessInput()
+
+			player_movement = glm::vec3(0, 0, 0);
+
+			const Uint8 *keys = SDL_GetKeyboardState(NULL);
+
+			if(keys[SDL_SCANCODE_A]) {
+				player_movement.x = -1.0f;
+			}
+			else if (keys[SDL_SCANCODE_D]){
+				player_movement.x = 1.0f;
+			}
+
+
+		- All movement needs to consider timing.
+			Code:
+
+				float lastTicks = 0.0f;
+				
+				void Update(){
+					float ticks = (float)SDL_GetTicks() / 1000.0f;
+					float deltaTime = ticks - lastTicks;
+					lastTicks = ticks;
+
+					//Add (direction * units per second * elapsed time) //add by how much they want to move by how fast they want to move (in deltaTime)
+					player_position += player_movement * player_speed * deltaTime;
+
+					modelMatrix = glm::mat4(1.0f);
+					modelMatrix = glm::translate(modelMatrix, player_position);
+					//reset to identity matrix, and translate it to new position
+				}
+
+
+8) Look Out!
+
+
+	-Joysticks are in a circle, however the WASD keys would make a square...
+		the pythagorean theorem: A^2 + B^2 = C^2
+		Pressing D movement vector = [1,0] : what is the magnitude? (1)(what is the length?)
+		Pressing W movement vector = [0,1] : what is the magnitude? (1)
+		what would happen if you pressed w and d at the same time?
+		Pressing W and D movement vector = [1,1] : what is the magnitude? (1.414)
+
+		This is a problem because you would move faster using a keyboard then you would
+		using a controller.
+
+	-Unit Vector
+		(a vector with a magnitude of 1)
+
+		[-1,1]	
+			|--------------|
+			|    .	|  . <-|-- [.707,.707]
+			| .	    | /  . |
+			|.------|-----.|
+			| .		|    . |
+			|	 .	|  .   |
+			|--------------| [1,-1]
+
+
+		when using a joystick, you would be moving less than you would on a keyboard
+		because you are only moving .707, instead of 1.
+
+		to stop this from happening, we need to normalize a vector.
+
+		you can do this by dividing it by the magnitude.
+
+		-Normalize a vector to get a unit vector (divide it by magnitude).
+
+			Code:
+
+				if(glm::length(player_movement) > 1.0f) {
+					player_movement = glm::normalize(player_movement);
+				}
+
+				(are you trying to move faster than 1, if so, then we're gonna
+				set it to one)
+
+
+
+
+
+
+9-11) In code...
+
+
+
+12) Collision Detection Introduction
+
+	- we're almost ready to make a game!
+	
+	- What we have learned so far:
+		- Initializing SDL, OpenGL, and creating a window.
+		- Drawing a triangle
+		- Transformations: translation, rotation, scale.
+		- Handling timing.
+		- Loading images and rendering textures
+		- Keyboard, mouse, and controller input.
+		- Movement based on unit vector, speed, and deltaTime.
+
+		But we need one more thing to make our first game.
+		and that is collision Detection!
+
+
+
+13) Circle to Circle Collision Detection
+
+	- One of the easier ones. (very fast to calculuate)
+	- Ex: In game hundreds, Agar.io, Asteroids (1979), Osmos (created by NYU Professor!)
+
+
+	What happens if we have two circles and we want to see if they are colliding or intersecting.
+	They each have a center and they each have a radius. 
+
+	Ex: 
+		Circle one:						Circle two: 
+			- Radius = 3					- Radius = 3
+			- Center coords = (-2, -2)		- Center coords = (3, 3)
+
+		Radius one + radius two = 5
+		Distance from eachother's centers: 7.07 (pythagorean theorem)
+		
+		Since distance > (radius + radius), they are not intersecting
+
+
+	Ex: 
+		Circle one:						Circle two: 
+			- Radius = 3					- Radius = 3
+			- Center coords = (0, 0)		- Center coords = (3, 3)
+
+		Radius one + radius two = 5
+		Distance from eachother's centers: 4.24 (pythagorean theorem)
+		
+		Since distance < (radius + radius), they are intersecting
+
+
+	Summary: If the distance between the center of the circles is less than the sum
+				of the radii, they are colliding.
+
+				   P1						  P2
+				 .  ^  .				   .  ^  .				 
+			   .    |r1  .		d		 .    |r2  . 
+			  .     * <-- . ----------- . --> *     .
+			   .	     .				 .	       . 
+			 	 .	.  .				   .  .  .   
+
+
+
+
+14) Point to circle Collision Detection
+
+	- If the distance betweeen the point and the circle's center is less than the 
+		radius, they are colliding.
+
+					P1						  
+				 .  ^  .				   				 
+			   .    |r1  .		d		     P2
+			  .     * <-- . ---------------> *     
+			   .	     .				  
+			 	 .	.  .				     
+
+
+
+15) Box to Box Collision Detection Introduction
+	
+	-Probably one of the more common ones, (we are going to be using this the most)
+	Ex: Zelda, A Link to the Past, (a lot of nintendo games), street fighter
+
+
+16) Box to Box Collision Detection Calculation
+
+	Ex: 
+		Box one:						Box two: 
+			- Width = 5						- Width = 3
+			- Height = 3					- Height = 5
+			- Center coords = (-3, -3)		- Center coords = (3, 2)
+
+
+		Difference of X Coordinates (centers): 6 (fabs(x2 - x1))
+		Difference of Y Coordinates (centers): 5 (fabs(y2 - y1))
+
+		X distance = XDiff - (W1 + W2)/2
+		Y distance = YDiff - (H1 + H2)/2
+		
+		X distance = 2
+		Y distance = 1
+
+		If both x and y distance < 0, then they are colliding
+		So these are not colliding
+
+	Ex: 
+		Box one:						Box two: 
+			- Width = 5						- Width = 3
+			- Height = 3					- Height = 5
+			- Center coords = (0, -1)		- Center coords = (3, 2)
+
+
+		Difference of X Coordinates (centers): 3 (fabs(x2 - x1))
+		Difference of Y Coordinates (centers): 3 (fabs(y2 - y1))
+
+		X distance = XDiff - (W1 + W2)/2
+		Y distance = YDiff - (H1 + H2)/2
+	
+		X distance = (3) - (5 + 3)/2
+		Y distance = (3) - (3 + 5)/2
+
+		X distance = -1
+		Y distance = -1
+
+		Both are < 0, so they are colliding
+
+
+	Part of the code of how we would do this:
+		
+		float xdist = fabs(x2 - x1) - ((w1 + w2) / 2.0f);
+		float ydist = fabs(y2 - y1) - ((h1 + h2) / 2.0f);
+
+		if (xdist < 0 && ydist < 0) //Colliding
+
+
+
+
+17) Point to Box Collision Detection
+
+	- Useful for telling if someone clicked on a box. Or maybe the character has a box
+		around them and you want to check if the player clicked on the character.
+
+	- You do this by getting the top left and bottom right corners and checking if
+		the x,y of the point is inside those corners. (the corner is half the width,
+		and half of the height. bottom right, you'd take half the width and half the 
+		height, and then add and then subtract to go down to figure out if that point
+		is within those two corners)
+
+
+18) Pong
+
+	- In the pong example, the ws key move the player on the left and the up and down
+		keys move the player on the right. and the space bar starts moving the ball.
+	- Tha ball is also a rectangle, this makes it easier to do box to box collision
+		detection.
+	- When you lose, you can no longer move the paddles, the ball stops in its position
+		its clear that the game has ended.
