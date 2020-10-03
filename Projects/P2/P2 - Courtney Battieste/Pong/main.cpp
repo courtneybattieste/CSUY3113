@@ -182,9 +182,6 @@ void Update() {
         }
 
         lMatrix = glm::mat4(1.0f);
-        /*if(left_position.y > 5)
-            left_position -= left_movement * player_speed * deltaTime;*/
-
         lMatrix = glm::translate(lMatrix, left_position);
         lMatrix = glm::rotate(lMatrix, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         lMatrix = glm::scale(lMatrix, glm::vec3(1.0f, .5f, 1.0f));
