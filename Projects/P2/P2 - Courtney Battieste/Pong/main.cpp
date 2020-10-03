@@ -16,6 +16,7 @@
 
 SDL_Window* displayWindow;
 bool gameIsRunning = true;
+bool started = false;
 
 ShaderProgram program;
 glm::mat4 viewMatrix, projectionMatrix, lMatrix, rMatrix, bMatrix;
@@ -119,6 +120,14 @@ void ProcessInput() {
                 gameIsRunning = false;
                 break;
 
+            case SDL_KEYDOWN:
+                switch (event.key.keysym.sym) { //.. now we are going to be looking for which key was it
+                    case SDLK_SPACE:
+                        started = true;
+                        break;
+                    }
+                    break; //SDL_KEYDOWN
+
           
         }
     }
@@ -207,28 +216,32 @@ void Update() {
 
 
         //ball
-        if (ball_position.y > 3.75 - .45)
-            changey = -1.0f;
-        else if (ball_position.y < -3.75 + .45)
-            changey = 1.0f;
-        ball_movement.y = 1.0f * changey;
+        if (started == true) {
+            if (ball_position.y > 3.75 - .45)
+                changey = -1.0f;
+            else if (ball_position.y < -3.75 + .45)
+                changey = 1.0f;
+            ball_movement.y = 1.0f * changey;
 
-        //collision math
-        float leftxdist = fabs(ball_position.x - left_position.x) - (1 / 2.0f);
-        float leftydist = fabs(ball_position.y - left_position.y) - ((1 + 1) / 2.0f);
-        float rightxdist = fabs(ball_position.x - right_position.x) - (1 / 2.0f);
-        float rightydist = fabs(ball_position.y - right_position.y) - ((1 + 1) / 2.0f);
+            //collision math
+            float leftxdist = fabs(ball_position.x - left_position.x) - (1 / 2.0f);
+            float leftydist = fabs(ball_position.y - left_position.y) - ((1 + 1) / 2.0f);
+            float rightxdist = fabs(ball_position.x - right_position.x) - (1 / 2.0f);
+            float rightydist = fabs(ball_position.y - right_position.y) - ((1 + 1) / 2.0f);
 
-        if (rightxdist < 0 && rightydist < 0)
-            changex = -1.0f;
-        else if (leftxdist < 0 && leftydist < 0)
-            changex = 1.0f;
-        ball_movement.x = 1.0f * changex;
+            if (rightxdist < 0 && rightydist < 0)
+                changex = -1.0f;
+            else if (leftxdist < 0 && leftydist < 0)
+                changex = 1.0f;
+            ball_movement.x = 1.0f * changex;
 
-        ball_position += ball_movement * ball_speed * deltaTime;
+            ball_position += ball_movement * ball_speed * deltaTime;
 
-        bMatrix = glm::mat4(1.0f);
-        bMatrix = glm::translate(bMatrix, ball_position);
+            bMatrix = glm::mat4(1.0f);
+            bMatrix = glm::translate(bMatrix, ball_position);
+        }
+        else
+            ball_position += 0;
     }
     
 }
