@@ -1,0 +1,518 @@
+Week 6
+
+
+1) Basic Game Physics
+
+	- we are going to add gravity, jumping, and just movement in general.
+	- topics: fixed timestep, veloctiy, acceleration.
+	- currently, our timestep is as fast as our computer can go as well as variable
+		lately what we have been using is deltaime whichc is basically the time between frames
+		but sometimes your fps can be different dpending on what part of the game you are playing
+		so it might be faster or slower. its not always going to be updating the same amount.
+		its alittle bariable and unpredictable. when we have a variable time step, for example if our
+		pong project. its not really moving the ball every little bit across the screen but it is
+		teleporting the ball little by little across the screen. But for our pong ball
+		if it were too teleport a little bit too far past the paddle to where the collision
+		wouldn't detect it, then this would be bad. this could happen if a frame were to alll
+		of a sudden happen slower than usual the time step is different andn ow the ball is 
+		placed behind thepaddle. we can't use a variblae timestep with physics because we need
+		it to be constant
+
+2) FixedTimeStep
+
+	we always want our update to happen in the same interbals, we don't want one to happen in
+	like a 10th of a second and another one just to happen in a 15th of a second.
+
+	this is how we would code that:
+
+		#define FIXED_TIMESTEP 0.0166666f
+		float lastTicks = 0;
+		float accumulator = 0.0f;
+		void Update() {
+			 float ticks = (float)SDL_GetTicks() / 1000.0f; //first we get how much time has passed
+			 float deltaTime = ticks - lastTicks;
+			 lastTicks = ticks;
+
+			 deltaTime += accumulator; //if not enough time has passed, then we put it into the accumulator
+			 //lets say the game is moving really fast, we'll just store it here until enough time has passed
+			 if (deltaTime < FIXED_TIMESTEP) {
+				 accumulator = deltaTime;
+				 return;
+		 }
+
+		 while (deltaTime >= FIXED_TIMESTEP) {
+			 // Update. Notice it's FIXED_TIMESTEP. Not deltaTime
+			 state.player->Update(FIXED_TIMESTEP); // even if the compute pausese for a second or is running
+			 //super slow, we will still update the character so that they are moving to where they hsould be
+			 //aka we are accounting for lag. 
+
+			 deltaTime -= FIXED_TIMESTEP; //
+		 }
+
+			 accumulator = deltaTime;
+		}
+
+
+
+3) Gravity (acceleration due to gravity (9.81m/s^2))
+
+	player.acceleration = glm::vec3(0, -9.81, 0); //we are basically saying that they rae alwyas moving down
+
+	-acceleration, is the rate of change in velocity.
+		here our velocity would look like
+
+		velocity.x += acceleration.x * elapsed;
+		velocity.y += acceleration.y * elapsed;
+
+		// You can also do this
+		velocity += acceleration * elapsed;
+
+	- as long as we are accelerating, our velocity will get faster and faster.
+	-first we set how fast our accelration is, and now we set our velocity and how fast we are goin
+
+	- velocity is change of position over time. our position is updated based on velocity.
+
+	when we put this all together...
+
+		player.acceleration = glm::vec3(0, -9.81, 0);
+
+		void Update(float deltaTime){
+			velocity += acceleration * deltaTime;
+			position += velocity * deltaTime;
+		}
+
+		- Notive how if acceleration never changess, velocity will keep accumulating
+		- the player is essentially, always falling all the time
+		- we update our velocity by our position
+		- and we update our velocity by our acceleration.
+
+	- Now let's code!
+
+
+4) Coding Part 1
+
+	we didn't really do anything, we just copied and pasted new code from the github repository
+		but all that the code can do is move goerge from left to right becayse we are getting
+		ready to add a jump feature which is really nice. now lets move on to the fixedtimestep
+		code
+
+
+5) Coding Part 2
+
+	we changed the update function in the main cpp file so that it will update
+		according to a fixed time and not according to deltaTime. just because
+		deltatime can be different based on things like if the cmoputer freezes or not
+		now we are going to add a little bit of physics
+
+6) Coding Part 3
+
+	to entity h file. we added varibales including the accleration and velocity of
+		the character.. and then in the main cpp file, in the initialize function
+		we initialized acceleration to glm::vec3(0, -9.81f, 0); which basically means
+		that the character will always be in a state of free fall. also in the
+		entity cpp file. we initalized the accerlation and velocity things to just
+		straight up be glm::vec3(0); now we need to put this into our update function
+		so that it can actually translate these physics to the screen
+
+
+7) Coding Part 4
+
+	we changed code in the enitity cpp update function so that if the character is
+	trying to move, the velocity will be changed. we also made it to where it will
+	have instant velocity when they are trying to move and not just slower to fast
+	velocity (like a car). we also added acceleration to our velocity so that it will
+	accumulate over time and we changed position to be velocity * deltaTmie. then when
+	we compiled and ran it, george was just falling off the screen. so what we need
+	to do now is the put a platform on the ground so that he will have something to 
+	stand on. also if we changed the value in the initialize main cpp function to something
+	greater than -9.81 but less than 0, then george would fall slower and would still
+	be able to move around while falling.
+
+
+
+8) Coding part 5
+
+	so what we did was we added some platfroms so that george can hae something to stand
+	on. how we did that was we added a new entity to the game state and added 3 platforms
+	then we initialized them in the main initialize and then we updated them in that 
+	function as well so that it would update their own individual model matrices. 
+	then from there, when we ran it, george estill falls throgh the platforms. so what
+	we need to do now is have some form of collision detection so that george will not
+	fall all the way through.
+
+
+
+9) Coding Part 6
+
+	so now what we did was we made it to wear every entity will check for a collision in
+	the update entity cpp file. we did this by making a whole new function called
+	Check Collision, and we pass in an entity and calculate whether its colliding or not
+	in the update function, we pass in deltatime, all the entities that need to be checked
+	for collision and we passsed in the number of things that we need to check collision for
+	this will break if they are colliding and won't update velocity, wont update position, and
+	wont update acceleartion. this is good as george will no longer fall throguh the platform
+	but this is also bad because now he cant really move anywhere. now we need to refine what
+	we made so that he wont be able to move any further down but he can move side to side. also
+	professor says that the character is a little bit stuck into the platform so we need to 
+	accomodate for this so that the pixels don't overlap.
+
+
+
+10) We Got Stuck!
+
+	- what we can do so that goerge caan move is check for overlap. if the object is 
+		accelerating downward and is stopped by a platform, what can happen is that the
+		object will get a little stuck into the platofrm. in order to prevent this from happening
+		what we need to do is fix before rendering. (fix before we draw to screen when we see
+		that we collided with something). 
+
+		Code: 
+			float ydist = fabs(position.y - other->position.y);
+			float penetrationY = fabs(ydist - height / 2 - other->height / 2);
+
+			
+			void Entity::Update(float deltaTime, Entity* platforms, int platformCount)
+			{
+				velocity += acceleration * deltaTime;
+				position += velocity * deltaTime;
+				for (int i = 0; i < platformCount; i++)
+				{
+					Entity* platform = &platforms[i];
+
+					if (CheckCollision(platform))
+					{
+						float ydist = fabs(position.y - platform->position.y);
+						float penetrationY = fabs(ydist - (height / 2.0f) - (platform->height / 2.0f));
+						if (velocity.y > 0) {
+							position.y -= penetrationY;
+							velocity.y = 0;
+						}
+						else if (velocity.y < 0) {
+							position.y += penetrationY;
+							velocity.y = 0;
+						}
+					}
+				}
+			}
+
+
+			we are basically asking, have we collided with something. if so lets get the
+			distance from our centers and see how far down we went. then cover the distance
+			of too far that we went and shift back up that distance. if we are jumping up and
+			run into a platform, then we will calculate the different and shift ourselves down.
+
+		for our next thing, we are going to update our collision dectecting a little bit. we are
+		going to add jumping, and then we are going to check if our moving works again.
+	- Lets code!!
+
+
+11) coding part 1
+
+	so what we did is we changed our collision detection so that it would accomodate for
+	if something collides too much and the entties overlap. so what we did was adjust it
+	so that right after the velocity is updated, if theere is a collision, it will shift
+	that player down or up depending on if the player is moving down or up (if player velocity
+	is negative or positive.) based on that it will caluclate the distance to the edge of the
+	platform and shift that player down or up. but after we changed that, we noticed that george
+	seemed as if he was floating, and this is because george's sprite sheet index doesn't fully
+	occcupy the entire square. so we changed the player's height and width to be a little be less
+	than 1 so that it would make his feet touch the ground. now that we have done that its 
+	starting to look more and more lieka real game. what we need to add now though it jumping
+	and thats what we are going to do next.
+
+
+
+12) coding part 2
+
+	so what we did is we added jump. and we did this by having a bool jump in our entity h
+	and a jump power float. and in main initialize, we set jumpower equal to 3 at first but
+	then we changed it to 5 so that it can be better. and then we when into our processinput
+	and we checked if the space bar was being pushed. and if it was then we set our bool
+	jump to true. (our entity player). and then we went into entity cpp update and we changed
+	it to where if jump was true. then we are going to set it to false again and add the
+	jump power to our players velocity. now george can jump, which is really cool. the only
+	bad thing is, it doesn't check to see if his feet has touched the ground yet before allowing
+	for the next jump, so you can press spacebar as much and you want and he will jump or
+	float up as much as he can. he eventually always falls down, which is really cool and looks
+	really fluid tbbh. but now we need to account for realizstic.
+
+
+13) coding part 3
+
+	so what we did was we added another platform to the left of george so that he can try
+	jumping to it. we updated our global constant variable to be 4, we added another platform
+	we then made sure that he walked a little faster by changing the speed to 1.5 instead of 1.
+	and he can jump to it successfully. the only thing is is that the jumping is still alittle
+	wonky, and if you hold down the space bar he will fly lol.
+
+
+
+14) coding part 4
+
+	so now what we did is we added another platform square on top of the original 3 block
+		platform that we had. so it kinda looks like a step. but the problem with this now
+		is that george can walk through it easily. he can land on top of it and be fine
+		but the only thing is that you can walk through the sides of the platform as long
+		as you don't collide with the top or bottom, which is bad. so we are going to try and
+		fix that now.
+
+
+15) CheckCollisions
+
+	- so we need to update our collision detection algorithm. what we are going to do is look
+		at our y velocity first,, check if we have collided with anything, and if we have
+		we are going to adhust for penetration, then we are going to checkc the x velovity next.
+		if we have collisionsof any kind, then we are going to adjust for penetration. and once
+		we have done both of these thing, then it will be ok to fully update our object with 
+		its position.
+
+		void Entity::Update(float deltaTime, Entity* platforms, int platformCount)
+		{
+			velocity += acceleration * deltaTime;
+
+			position.y += velocity.y * deltaTime; // Move on Y
+			CheckCollisionsY(platforms, platformCount);// Fix if needed
+
+			position.x += velocity.x * deltaTime; // Move on X
+			CheckCollisionsX(platforms, platformCount);// Fix if needed
+		}
+
+		- we are going to change the y position first, check for collisions, and then
+			changing the x position and checking for collisions.
+
+
+			void Entity::CheckCollisionsY(Entity* objects, int objectCount)
+			{
+				for (int i = 0; i < objectCount; i++)
+				{
+					Entity* object = &objects[i];
+
+					if (CheckCollision(object))
+					{
+						float ydist = fabs(position.y - object->position.y);
+						float penetrationY = fabs(ydist - (height / 2.0f) - (object->height / 2.0f));
+						if (velocity.y > 0) {
+							position.y -= penetrationY;
+							velocity.y = 0;
+						}
+						else if (velocity.y < 0) {
+							position.y += penetrationY;
+							velocity.y = 0;
+						}
+					}
+				}
+			}
+
+			void Entity::CheckCollisionsX(Entity* objects, int objectCount)
+			{
+				for (int i = 0; i < objectCount; i++)
+				{
+					Entity* object = &objects[i];
+
+					if (CheckCollision(object))
+					{
+						float xdist = fabs(position.x - object->position.x);
+						float penetrationX = fabs(xdist - (width / 2.0f) - (object->width / 2.0f));
+						if (velocity.x > 0) {
+							position.x -= penetrationX;
+							velocity.x = 0;
+						}
+						else if (velocity.x < 0) {
+							position.x += penetrationX;
+							velocity.x = 0;
+						}
+					}
+				}
+			}
+
+
+		- so now let's update our code. with the new checkcollision y, checkcollisionx,
+			and update.
+
+
+
+16) Coding part 1
+
+	so what we did is we added the new functions, checkcollision x and y, and then we
+		update the update function in the entitycpp file and made sure that it called
+		both checkcollsions and update the position accrodingly. george now cannot walk into
+		the platforms from any direction which is very good, we might have to adjust his
+		width just like we adjusted his heigjt but other then that and the fact that you can
+		jump as mnay times as you want. adding platforms and checking for collisions has
+		never been easier.
+
+
+17) Entity Type
+
+	- different entity types, like main character, enemies, collectibles. different things
+		happen when you collide with different entities. for example, collding with a coin
+		in mario will make you earn one point and the coin will dissapear, or colliding with
+		an enemy from the side will make you lose a heart but colloding with an enemy from
+		the top will make it disappear. if enemies colilde with eachother, nothing relaly
+		jappens because maybe enemies can overlap and nothing will happen.
+
+		- we can put int multiple types of entityes but creatig an enum.
+
+		enum EntityType { PLAYER, PLATFORM, COIN, ENEMY };
+		class Entity {
+		public:
+
+			EntityType entityType;
+			glm::vec3 position;
+			glm::vec3 velocity;
+			glm::vec3 acceleration;
+
+
+		- if this entity is a wall, then dont do anything,
+			maybe if its a coin, then make it spin, 
+			but if its aplayer, then they can do anything.
+		- we can change our update behviour depending on what kind of entity that it is
+
+		void Entity::Update(float deltaTime, Entity* objects, int objectCount)
+		{
+			if (entityType == WALL) {
+				return;
+			}
+			else if (entityType == COIN) {
+				// spin
+			}
+			else if (entityType == ENEMY) {
+				// Move left to right
+			}
+			else if (entityType == PLAYER) {
+				// Do all the things
+			}
+		}
+
+
+		- this is gonna help with our collsion, this basically says, if we collided with
+			something, what was the thing that we collided with. and then we can store
+			that in last collision. ex: if we collided with an enemy, then maybe we want
+			to call something else.
+		bool Entity::CheckCollision(Entity* other)
+		{
+			float xdist = fabs(position.x - other->position.x) - ((width + other->width) / 2.0f);
+			float ydist = fabs(position.y - other->position.y) - ((height + other->height) / 2.0f);
+			if (xdist < 0 && ydist < 0)
+			{
+				lastCollision = other->entityType;
+				return true;
+			}
+
+			return false;
+		}
+
+
+
+		- we want to put this code somewhere, it could go in entity or main, but in general
+			when we look at what the last thing we collided with, we can determine what we
+			want to do next, which can be very useful
+		// Somewhere in your code
+		if (player->lastCollision == COIN) {
+			// get points
+		}
+		else if (player->lastCollision == ENEMY) {
+			// take damage
+		}
+
+
+
+18) isActive
+
+	- isActive is a boolean value. for example, prfoessor shows a scene where mario jumps
+		through a group of floating coins, only some of them colliding with mario and
+		ultimately dissappearing, the others staying in place because they weren't touched.
+		he says that this could be represented by an array of coins, and when they are collided
+		with, they are set to not active, which is way better than deleting the coin from the
+		array, reallocating memeory, and wasting a lot of time. instead of getting rid of the 
+		coins existence, we just set it to not active. (dont draw, dont update);
+
+	- we can update our header file to have an isActive bool; by default, everything could
+		be active. 
+
+	- how does this effect other functions? 
+		- in Update. whenever is active is false, you want to exit right away, so that
+			nothing else about the object is updated anymore.
+		- in checkcollision. if anyone one of the objects is not active and there is a
+			collision, this collision is ignored because technically the object doesnt exist.
+			we would return false.
+		- in Render. there wouldn't be any render, the object would effectively be removed
+			from the scene and would no longer be shown. exit right away.
+
+
+19)
+
+	- we are going to add one more thing to our entties and that is a collision flag.
+		basically when we collide with something, we want to know where exactly we collided
+		with it. for example, in mario, if mario collides with an enemy at the enemy's top
+		but mario's feet, then its ok. but if mario were to collide with the enemy from the
+		side or from any other position then it wouldn't be ok. the player would lose health
+		. or maybe if the enemy colllides with a wall, you would want it to walk the other 
+		dreiction. or maybe if you were to collide with a block, but the blok was above you, 
+		then you would be able to break the block. but if the block was below you, then you
+		would just stand on it.
+	- what we can use this for is, our player can only be allowed to jump, when touching the
+		ground. so when we have a collision below us, its ok to jump, but if theres nothing
+		there, ,then its not ok to jump. 
+
+	- with this we would need to addd a lot of collision flags in our entity header file
+		bool collidedtop;
+		bool collidedBottom; and so on and so forth.
+	
+	- so lets get to coding, we are going to add the isActive code in their and add the
+		collsion flags.
+
+
+20) coding part 1
+
+	so what we did was add the isActive boolean to our eneity h file. from this we were
+	able to go into our update file and return nothing if isactive was false. we also went
+	into render and returned nothing if isactive was false. and then we went into check
+	collision and we checked whether current entity or other had an isactive that was false
+	and if either was. then we returned false. meaning that it wasn't colliding with anything
+	because there isn't anything there. now what we are going to do is add in collision
+	falgs.
+
+
+21) coding part 2
+
+	now we re going to add in our collision flags. so what we did was we added four new
+	booleans to the entity header file which were all labeled for their correspdoning
+	direction, up down left right. and then when ever we checked collision, in check
+	collision x and y we would set whichever one it was to true.
+	and in the update function we would set the booleans to false because we haven't checked
+	for collisions yet, so we would reset them. 
+
+	professor also gave a hint for the next project:
+		after you check for collision in update but before you update the modelmatrix
+		maybe check to see which object was it that you collided with.
+		he also said that if you wanted to, you could put that code in the collisioncheck
+		x or y individually. "if i collided with something below me, what was that"
+		or maybe you could put that code inside the main cppp file. ig its personaly preference
+		whichever place you would like to oput it.
+
+
+
+22) DrawText
+
+	-draw text creates triangles and then takes the font texture and renders those triangles.
+		very similar to taking a normal entity and rendering the texture for it.
+	-DrawTExt is not a print statement, it is something that renders triangles so it belongs
+		inside of render. you should not use draw text inside of update. it belongs inside
+		of render because it is rendering something. 
+	- you can put some if statements like, if the game is in a certain state of some kind
+		(main menu, regular game, cutscene, etc.) then draw this text, otherwise dont draw it
+
+	Example Code:
+		DrawText(&program, fontTextureID, "Hello!", 1, -0.5f, glm::vec3(-4.25f, 3, 0));
+
+
+23) Lunar Lander example.
+
+	- he is using one of the fonts from the github repository. and he is using drawText code
+		to put it on the project. lunar lander is a game where you try to land a spaceship
+		on a platform. you can change the text if you want, you can have multiple platfroms,
+		but please meet the requirements of the project. the gravity he has in his game
+		is really low. you need to be to fail and succeed so that. each ending needs to
+		either read mission successful or mission failed.
+	

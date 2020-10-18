@@ -1,0 +1,571 @@
+Textures, Texture Atlas, Sprite Sheets, Fonts
+
+1) Textures Review	
+	- Texture Coordinates are referred to as UV coordinates (x, 
+		y and z were already taken). The range is from 0.0 to 1.0.
+	  (0,0)			(1,0)	
+		|-------------|
+		|             |
+		|             |
+		|             |
+		|-------------|
+	  (0,1)			(1,1)
+
+	- Sprites are made up of two triangles (at least the 2D ones).
+		So what we are doing is matching the vertices to the UV coordinates.
+
+	(-.5,.5)		(.5,.5)	Vertices
+		|-------------|
+		|          /  |
+		|      /      |
+		|  /          |
+		|-------------|
+	 (-.5,-.5)		(.5,-.5)	 (0,0)			(1,0)  UV coordinates
+									|-------------|
+									|             |
+									|             |
+									|             |
+									|-------------|
+								  (0,1)			(1,1)
+
+						  first triangle (bottom right)     second triangle (top left)
+							 /----------------------\      /---------------------\
+		float vertices[]  = {-.5, -.5, .5, -.5, .5, .5,   -.5, -.5, .5, .5, -.5, .5};
+		float texCoords[] = {0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0};
+
+
+	- We can use a portion of a texture, meaning if we only wanted to use part of the 
+		picture instead of the whole entire picture.
+	- On 3D models, you can use a 2D image to map it onto 3D images using triangles
+		(think minecraft skins)
+
+
+2) Texture Wrap Mode
+
+	- Normally the coordinates are like the ones we see above. But what happens
+		if we use a bigger range (0.0 - 2.0) instead of just (0.0 - 1.0). 
+
+	(0,0)			(1,0)				(2, 0)
+		|-------------|--------------------|
+		|             |					   |
+		|             |					   |
+		|             |					   |
+		|-------------|					   |
+	  (0,1)			(1,1)				   |
+	    |                                  |
+		|                                  |
+		|                                  |
+		|                                  |
+		|----------------------------------|
+      (0, 2)                            (2, 2)
+
+	  In Texture wrap mode, we can use different things we're it will just repeat
+		the image, or it can mirror the image. or it will "clamp to edge" where 
+		it will use the last color and pixel and spread it out till the edge. Or 
+		we can just clamp to border which will just fill the empty space with
+		black. 
+
+	- How do we do this with code?
+
+		add these 2 lines to LoadTexture():
+			glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		
+		add it underneath the 
+			glTexImage(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+		and right above the
+			glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+
+		- Basically tells the opengl what to do if the texture coordinates are beyond
+			1.0.
+
+	- This is very useful for repeating tiles. For example, if you are trying to draw
+		a wall with repeating bricks, you can make the triangle however big you need 
+		the wall to be and use the repeat function to optimize your code. by only
+		using two triangles and repeating the texture across multiple things.
+
+
+3) Texture Atlas (multiple sprites in a single texture)
+
+	- Theres something known as a sprite sheet, which has each individual sprite
+		needed for the game (for example, he shows angry birds).
+	- Instead of loading each sprite individually, which would be alot of work, you
+		just load one image onto the graphics card, and pick out which image you need
+
+	- Another example is called a tileset. You can use whichever thing you need to
+		build out a map, (ex: he shows things like doors, or minecraft blocks)
+	- the way you can pull out an individual tile, is just to use texture coordinates
+		to pull out a specific tile from that thing.
+	- 3D game example is minecract, its just one file with all the blocks on it and
+		and you can pull out one block individually for whichever thing you need.
+	
+	- Another thing you can use is fonts. An image will show the letters in a font.
+		and it will show you all of the characters that you might need. But for
+		our games we are going to use an image and take out the letter that we need
+		for user interface.
+
+
+4) Evenly spaced texture atlases
+
+	- A not evenly spaced texture is bad because you cannot put a uniform grid on it
+		so that every object can fit into its own square perfectly. For our games,
+		in order to combat this, we are going to use evenly spaced textures.
+
+	- For example, some textures can contain different states of a character, so that
+		when you need to animate the character walking, you just pull up a different
+		picture from a different part of the grid texture. 
+
+	- Whenever you look for art, try to look for things that are evenly spaced, other wise
+		it will not work.
+
+
+5) Drawing a single sprite
+
+	- we are going to be working with george. We are going to be trying to pick one of the
+		images from the sprite texture sheet and try to draw it into our program.
+	- we can index each picture.
+
+	- How do we do this?
+		we need to get the UV coordinates of each individual sprite. 
+
+		(0,0)			(1,0)	
+			|-------------|
+    (0, .25)|- -|- -| - |-| (1, .25)    pretend each square is indexed from 0-15 
+	 (0, .5)|- -|- -| - |-| (1, .5)     top left to bottom right (going from left to right)
+	(0, .75)|- -|- -| - |-| (1, .75)
+			|-------------|
+		  (0,1)			(1,1)
+
+		  when you draw the two triangles, you just need to use the UV coordinates from
+		  one of those individual sqaures.
+
+	Code:
+		(index = whichever square you want)
+		(rows = in this example is 4, cols = 4 as well)
+
+			float u = (float)(index % cols) / (float)cols; (you should get 0.75)
+			float v = (float)(index / cols) / (float)rows; (you should get 0.25)
+
+		(u,v) will give you the top left corner of the square that you want
+
+		now you need the width and height of the triangle so that you can get
+		the other coordinates
+
+			float width = 1.0f / float(cols); (gives you the width of each sprite)(0.25)
+			float height = 1.0f / float(rows); (gives you the height of each sprite) (0.25)
+
+		all of your tiles should have the same width and height
+		now to get all of the coordinates
+
+			float texCoords[] = {u, v + height, u + width, v + height, u + width, v, 
+				u, v + height, u + width, v, u, v};
+
+			float vertices[]  = {-.5, -.5, .5, -.5, .5, .5,   -.5, -.5, .5, .5, -.5, .5};
+
+
+		its exactly the same as before, except now you are putting invaribales instead of
+		hard coding it.
+
+		you're going to put all of this into a function called DrawSrpiteFromTextureAtlas()
+		- we'll come back to this though later
+
+	- and now when we go to the render() function. we can just call the drawsrpite function
+		and pass in the program, playerTextureID, and the index of which square we want
+
+	- when we do animation, we are going to be using an array and drawing different
+		indexes from that array so that it looks the sprite is moving
+
+6) Animation
+	
+	- In order to draw george walking, find out which sqaures you need and record their indices.
+		(3, 7, 11, 15). Depends on the sprite sheet but it might be diff indices.
+		- Then have a timer, if you're drawing a character that is going to be moving at 60fps,
+		you don't want to picture to switch 60 times, otherwise he would be running. So what
+		you would want to do is have it run on diffrent time then the velocity. 
+		- When the timer reaches its value, you want to switch to the next frame. 
+		- And once it gets to the last frame, you want to loop back to the first one. (this
+			might be different depending on what anumation you want to have but for walking
+			this is the one generally used.)
+
+	- What does this look like in code?:
+
+		//Inside of initialization
+		playerTextureID = LoadTexture("george_0.png");
+		cols = 4;
+		rows = 4;
+		animIndices = new int[4] {3, 7, 11, 15};
+		animFrames = 4;
+		animIndex = 0;
+
+		//Inside of Update
+		animTime += deltaTime;
+
+		if(animTime >= 0.25f)
+		{
+			animTime = 0.0f;
+			animIndex++;
+			if(animIndex >= animFrames)
+			{
+				animIndex = 0;
+			}
+		}
+
+		//Inside of Render
+		DrawSpriteFromTextureAtlas(program, playerTextureID, animIndices[animIndex]);
+
+
+7) Monospaced Font Rendering
+
+	- This means that all of the characters are the same width and the same height.
+	-For each character in a string, draw two triangles, use UV coordinates for each character.
+
+	- Sort of like a strip of triangles to create words. To get the index of the character,
+		we can use its ASCII value.
+
+
+8) DrawText
+
+	- We're going to walkthrough some of the code for DrawText()
+
+		text stands for what you want to write
+		size, if you want the letter to be half as tall
+		spacing, the amount of space between characters
+		position, where the strip of triangles will be (starting from top left and going across)
+
+		
+		voidDrawText(ShaderProgram *program, GLuint fontTextureID, std::string text,
+								float size, float spacing, glm::vec3 position)
+		{
+			float width = 1.0f / 16.0f;
+			float height = 1.0f; / 16.0f;
+		
+			std::vector<float> vertices;
+			std::vector<float> texCoords;
+
+			for(int i = 0; i < text.size(); i++){
+				int index = (int)text[i];
+				float offset = (size + spacing) * i
+				
+				float u = (float)(index % 16) / 16.0f; //individual character frame
+				float v = (float)(index / 16) / 16.0f;
+
+				vertices.insert(vertices.end(), {
+					offset + (-.5f * size), .5f * size, 
+					offset + (-.5f * size), -.5f * size, 
+					offset + (.5f * size), .5f * size, 
+					offset + (.5f * size), -.5f * size, 
+					offset + (.5f * size), .5f * size, 
+					offset + (-.5f * size), -.5f * size, 
+				}); //adding two triangles to the end
+
+				texCoords.insert(texCoords.end(), {
+					u, v, 
+					u, v + height,
+					u + width, v,
+					u + width, v + height,
+					u + width, v,
+					u, v + height,
+				});//adding coordinates to the end
+			}//end for loop
+			
+		}
+
+
+		Then in a different piece of code: we can change it to account for 
+		vertices.data() instead of just boulderMatrix
+		texCoords.data()
+		font
+
+
+		Ex: DrawText(&program, fontTextureID, "Lives: " + std::to_string(lives), 0.5f, -0.25f,
+									glm::vec3(-4.75, 3.3, 0));
+
+			.5f is the size of the word "Lives: any int"
+			.25f is the spacing in that word.
+
+			in your world, 0.0 is the center, so if you want the text to be int he top left
+			corner, you need your word to go -4.75 to the left and 3.3 up
+			Change the values to move where in the world you want the thing to be.
+
+
+9) Coding Part 1
+
+	Directly from the last class code, if I switch out ctg.png for george_0.png
+	then it will show me the entire sheet. So we need to create the function for 
+	that
+
+
+10) Coding Part 2
+
+	-So we added the DrawSpriteFromTExture Atalas function
+	-we added the animIndices, animIndex, and animFrames
+	-and we commented everything out in render except for glclear, program.setmodelmatrix, and added and call
+		to draw sprite fromtexture atlas
+	The result of doing this is that it will now call an individual sprite of george from the sprite sheet.
+
+
+11) Coding Part 3
+
+	- so we went ahead and added what we were supposed to to teh Update() function.
+	and it made him run, granted he was running in place, however the time was updated with deltaTime
+
+12) Coding Part 4
+
+	- so now we created 4 different arrays containing the indices for different animations.
+		4 different ones for the walking up animation, down, left and right. but now we need to make it
+		to where pressing a different direction key will make it change to its corresponding animation.
+		because right now you can move george all around the screen however his animation will still walk
+		in one direction
+
+13) Coding Part 5
+
+	- so now what we did was make sure to set the animIndices to which way we wanted him to
+		to in which ever else if statement key as pressed down. we then updated the Update()
+		function to make it to where if a key isn't being pressed down currently. he isn't
+		moving. we then made sure to reset the anim to its original frame if he isn't moving
+		so that he wouldn't just sto pthe animation midstep. .which looks unnaratural
+
+
+
+14) Game Objects Entities
+
+	- we might notive that we have a lot of globale variables. however if we were to
+		have tons of enemoies instead of a simple game, this would be really bad.
+		so we need to organize our code.
+	- Game Objects (entities)
+		anything in our game that can be interacted with or move around. maybe a space
+		ship, maybe an asteroud, maybe a collectivle. if we look at a game like gallaga
+		there are tons of differnt players and object on the screen. so we don't want
+		all these different global variables with different animations. 
+
+	Code:
+		this is what the header file looks like
+			class Entity{
+				public:
+					glm::vec3 position;
+					glm::vec3 movement;
+					float speed;
+
+					GLuint textureID;
+
+					glm::mat4 modelMatrix;
+
+					Entity();
+
+					void Update(float deltaTime);
+					void Render(ShaderProgram *program);
+			}
+
+		this is what the cpp looks like
+			#include "Entity.h"
+			
+			Entity::Entity(){
+				position glm::vec3(0);
+				speed = 0;
+
+				modelMatrix = glm::mat4(1.0f);
+			}
+
+			void Entity::Update(float deltaTime){
+				position += movement * speed * deltaTime;
+
+				modelMatrix = glm::mat4(1.0f);
+				modelMatrix = glm::translate(modelMatrix, position);
+			}
+
+			void Entity::Render(ShaderProgram *program)
+			{
+				program->SetModelMatrix(modelMatrix);
+
+				float vertices[]  = {-.5, -.5, .5, -.5, .5, .5,   -.5, -.5, .5, .5, -.5, .5};
+				float texCoords[] = {0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0};
+
+				glBindTexture(GL_TEXTURE_2D, textureID);
+
+				glVertexAttribPointer(program->positionAttribute, 2, GL_FLOAT, false, 0, vertices);
+				glEnableVertexAttribArray(program->positionAttribute);
+
+				glVertexAttribPointer(program->texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+				glEnableVertexAttribArray(program->texCoordAttribute);
+
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+
+				glDisableVertexAttribArray(program->positionAttribute);
+				glDisableVertexAttribArray(program->texCoordAttribute);
+			}
+			
+
+
+15) Object Pool
+
+	- if you have a boss that lets out a lot of objects that can hurt the player,
+		you don't want to call new and erase it every single time or it will be very
+		slow. so instead you can create something thats called an object pool.
+
+	- Whenever youre creating an object pool you want to consider a couple things first:
+		- what is the max number of objects?
+			maybe you will only ever have 100 bullters on the screen at one time
+
+		- create/allocate objects ahead of time.
+			before you even start the game or even start the round. you want to allocate
+			enough memory to accomodate for this
+		- use a bool for whats active or not
+			you can turn on whichever objects you want to have or whichever objects are
+			currently on the screen, and when they are no longer on the screen, you
+			can turn them off and reuse them for the next time they are on the screen
+		- you can test with a max amount of objects
+			this can be helpful because before you even start the game, you can create all
+			of the objects at one time and see if youre computer can handle the worst case
+			scenario, and if not you might have to change some things around.
+		- less prone to memory leaks. 
+
+
+16) Game State
+
+	- everything that is going on in the game right now. Ex: enemies, items, score, etc.
+
+	struct GameState{
+		Entity player;
+		Entity enemies[10];
+		Entity tiems[5];
+		int score;
+	};
+	- if you like want to pass on the player's progress from one level to the next you
+		can pass a game state to it and will let you know all of the stats.
+
+
+17) Game Mode
+
+	- different modes, like the main menu, ,maybe a level select, input is handled,
+		different way, enemies are behabing differently or maybe not even their at all
+
+	- Arcade games typically feature an "attract" mode.
+		also known as demo mode, sometimes seen in NES games. where the game will
+		play itself and will show you cutscenes or high scores. 
+
+	- Nowadays, you don't really need to do this for modern games. It just might sit at
+		the main menu until the player does something.
+
+	- How do we do this:
+
+		code: enum GameMod {MAIN_MENU, GAME_LEVEL, GAME_OVER};
+			  GameMode mode = MAIN_MENU;
+
+		when you want to put it into your processInput() 
+		void ProcessInput(){
+			switch(mode){
+				case MAIN_MENU: 
+					ProcessInputMainMenu();
+					break;
+				case GAME_LEVEL:
+					ProcessInputGameLevel();
+					break;
+				case GAME_OVER:
+					ProcessInputGameOver();
+					break;
+			}
+		}
+
+		in your update method 
+		void Update(){
+			float ticks = (float)SDL_GetTicks() / 1000.0f;
+			float deltaTime = ticks - lastTicks;
+			lastTicks = ticks;
+
+			switch(mode){
+				case MAIN_MENU: 
+					UpdateMainMenu(deltaTime);
+					break;
+				case GAME_LEVEL:
+					UpdateGameLevel(deltaTime);
+					break;
+				case GAME_OVER:
+					UpdateGameOver(deltaTime);
+					break;
+			}
+		}
+
+		in your render() method
+
+		void Render(){
+			glClear(GL_COLOR_BUFFER_BIT);
+
+			switch(mode){
+				case MAIN_MENU: 
+					RenderMainMenu();
+					break;
+				case GAME_LEVEL:
+					RenderGameLevel();
+					break;
+				case GAME_OVER:
+					RenderGameOver();
+					break;
+			}
+			SDL_GL_SwapWindow(displayWindow);
+		}
+
+
+		OR
+
+		you could make a class for each mode. MainMenu class, GameLevel class, and
+			GameOver class.
+
+
+18) Coding Part 1
+
+	What we did was basically added the entity.cpp and entity.h. we haven't done anything
+	else with this yet but we just added them to our project which is nice.
+
+19) Coding Part 2
+
+	After including the entity.h into our program, we were able to elminate all of the global varibales
+		containing the information for george, (player speed, movement, position), and store
+		that into one entity object. we then changed our processinput file to make sure that it
+		takes in information from the new entityobject instead of the old global variables and 
+		chnaged things in initialize as well in order to give initiliaze all of those things to the
+		entity obejct.
+
+
+20) Coding Part 3
+
+	so now what we did was delete a bunch of code and just call on the entity's code for updating and
+		rendering. this can be especially helpful for calling multiple of that enittty because then
+		you can just run a simple for loop with that call in it. the only problem we have here is that
+		the animation has been turn off and what we seen when we run the code is the entire sprite sheet
+		of george. we are now going to fix that.
+
+21) Coding Part 4
+
+	we just changed a lot more varibales in other functions so that they would call the entitys varibales
+	not the gloabal variables and we also moved some code from the maian update function to the entity's
+	update function. we also added it into an if statement to make sure that the sprite sheet is not null
+	we also added a lot more variables into the enitty.h file. like animindices and animframes. and set 
+	them equal to something in the itinitalias thing. something is still wrong with the aniation tho
+
+
+22) Coding Part 5
+
+	we cut the DrawSprite from something and put it into our entity.cpp file isntead. this makes it
+	so that it will draw the thing that we want it to but we put it in the file that specifically
+	uses it instead of keeping it in the main file which will cause clutter. we then made sure to
+	check that there was a sprite spreadsheet by checking that it was not null and then we made sure
+	to use it. if not then we were just going to make the basic two triangles and then move on with our
+	lives like normal. animation now works like he is supposed to.
+
+
+23) Coding Part 6
+
+	so now what we did is we were able to add enemies if we wanted to and how we did that
+	is we updated our gameStruct by adding another entity called enemies. we addded three of them
+	if we wanted to, in our initialize we could add them to our game with position random
+	and then we put them in our update and our render function to make sure that they are updated
+	and rendered properly. we were even able to make one of the enmies moe off of the screen if we
+	wanted to. the good thing about working with gamestate and entitys is that is cleans up
+	our code very nicely and allows for efficiency
+	
+	
+	
+
+	
