@@ -8,10 +8,11 @@ Entity::Entity()
     acceleration = glm::vec3(0);
     velocity = glm::vec3(0);
     speed = 0;
+    textureID = NULL;
 
     objectCollided = NULL;
-    bool gameOver = false;
-    bool successful = false;
+    gameOver = false;
+    successful = false;
 
     modelMatrix = glm::mat4(1.0f);
 }
@@ -44,7 +45,7 @@ void Entity::CheckCollisionsY(Entity* objects, int objectCount)
                 collidedTop = true;
             }*/
             if (velocity.y < 0) {
-                position.y += penetrationY;
+                //position.y += penetrationY;
                 velocity.y = 0;
                 collidedBottom = true;
             }
@@ -64,12 +65,12 @@ void Entity::CheckCollisionsX(Entity* objects, int objectCount)
             float xdist = fabs(position.x - object->position.x);
             float penetrationX = fabs(xdist - (width / 2.0f) - (object->width / 2.0f));
             if (velocity.x > 0) {
-                position.x -= penetrationX;
+                //position.x -= penetrationX;
                 velocity.x = 0;
                 collidedRight = true;
             }
             else if (velocity.x < 0) {
-                position.x += penetrationX;
+                //position.x += penetrationX;
                 velocity.x = 0;
                 collidedLeft = true;
             }

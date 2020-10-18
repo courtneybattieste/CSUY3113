@@ -23,7 +23,6 @@ struct GameState {
     Entity* player;
     Entity* platforms;
     Entity* finalPlatform;
-    Entity* endTitle;
     bool gameOver = false;
     bool successful = false;
 };
@@ -95,6 +94,8 @@ void Initialize() {
     state.player->acceleration = glm::vec3(0, -0.03f, 0);
     state.player->speed = 1.0f;
     state.player->textureID = LoadTexture("ufo.png");
+    state.player->width = 0.9;
+    state.player->height = 0.9;
 
     state.player->height = 1.0f;
     state.player->width = 1.0f;
@@ -170,12 +171,6 @@ void Initialize() {
     for (int i = 0; i < 2; i++) {
         state.finalPlatform[i].Update(0, NULL, 0);
     }
-
-    
-    state.endTitle = new Entity();
-    GLuint fontTextureID = LoadTexture("font2.png");
-    state.endTitle->textureID = fontTextureID;
-
 }
 
 void ProcessInput() {
@@ -314,21 +309,6 @@ void DrawText(ShaderProgram* program, GLuint fontTextureID, std::string text,
 
 void Render() {
 
-    GLuint fontTexture = LoadTexture("font2.png");
-
-
-    if (state.gameOver) {
-        if (state.successful) {
-            DrawText(&program, fontTexture, "Mission Successful!", 1, -0.5f, glm::vec3(0, 0, 0));
-        }
-        else {
-            DrawText(&program, fontTexture, "Mission Failed :(", 1, -0.5f, glm::vec3(0, 0, 0));
-        }
-        
-    }
-
-
-
     glClear(GL_COLOR_BUFFER_BIT);
 
     for (int i = 0; i < 2; i++) {
@@ -340,6 +320,18 @@ void Render() {
     }
 
     state.player->Render(&program);
+
+    if (state.gameOver) {
+        GLuint fontTexture = LoadTexture("font2.png");
+
+        if (state.successful) {
+            DrawText(&program, fontTexture, "Mission Successful!", .75, -0.33f, glm::vec3(-3.6, -0.75, 0));
+        }
+        else {
+            DrawText(&program, fontTexture, "Mission Failed :(", .75, -0.35f, glm::vec3(-3, -0.75, 0));
+        }
+
+    }
 
     SDL_GL_SwapWindow(displayWindow);
 }
