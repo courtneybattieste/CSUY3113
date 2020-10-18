@@ -117,7 +117,7 @@ void Entity::Update(float deltaTime, Entity* platforms, int platformCount)
     */
 
 
-    acceleration.x = movement.x * speed; //this is so the character has instant velocity
+    acceleration.x = movement.x * speed; 
 
     velocity += acceleration * deltaTime; //if we are moving, we are going to keep adding to velocity
 

@@ -1,6 +1,8 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(491,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (SDLProject.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  Entity.cpp
   main.cpp
 C:\Users\court\Documents\School\NYU\3 Sophomore Fall\CSUY3113\Projects\P3\P3 - Courtney Battieste\main.cpp(97,30): warning C4305: '=': truncation from 'double' to 'float'
 C:\Users\court\Documents\School\NYU\3 Sophomore Fall\CSUY3113\Projects\P3\P3 - Courtney Battieste\main.cpp(98,31): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\court\Documents\School\NYU\3 Sophomore Fall\CSUY3113\Projects\P3\P3 - Courtney Battieste\main.cpp(267,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\court\Documents\School\NYU\3 Sophomore Fall\CSUY3113\Projects\P3\P3 - Courtney Battieste\main.cpp(264,23): warning C4018: '<': signed/unsigned mismatch
+  Generating Code...
   SDLProject.vcxproj -> C:\Users\court\Documents\School\NYU\3 Sophomore Fall\CSUY3113\Projects\P3\P3 - Courtney Battieste\Debug\Week 5.exe

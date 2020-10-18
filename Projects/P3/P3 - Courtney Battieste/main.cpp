@@ -97,9 +97,6 @@ void Initialize() {
     state.player->width = 0.9;
     state.player->height = 0.9;
 
-    state.player->height = 1.0f;
-    state.player->width = 1.0f;
-
 
     // Initialize Game Objects
     state.platforms = new Entity[PLATFORM_COUNT];
