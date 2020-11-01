@@ -371,7 +371,7 @@ void Render() {
     if (state.gameStart) {
         DrawText(&program, fontTexture, "Kill all enemies & reach the end to win!", .43, -0.20f, glm::vec3(-4.55, 0, 0));
     }
-    else if (state.zeroKill) {
+    else if (state.zeroKill && !state.gameOver) {
         DrawText(&program, fontTexture, "Kill enemies by jumping on them", .43, -0.20f, glm::vec3(-3.25, 0, 0));
     }
 
