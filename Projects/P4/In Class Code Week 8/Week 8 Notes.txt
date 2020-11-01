@@ -1,0 +1,203 @@
+Week 8 Notes
+
+
+1) Game AI
+
+	- Basica AI concepts (states, behaviors, and sensing).
+	- Finite State machine, a model for something that can be in various states.
+		 can transition from state to state from external input. can only 
+		 be in one state at a time.
+	- in a game, maybe there is idle, maybe there is walking, and maybe there is
+		attacking. You need a way for the ai to swtich from state to state.
+		So maybe if the player is nearby, the ai will change its state to be a 
+		walking state. maybe if the player is close, it will be in an attacking
+		state. but if the player isnot close enough, then it will be in its
+		attackng mode.
+	- Now he shows us some example code for a final state machine.
+		maybe you can have an enum that classifies its state. {idle, walking,
+		attacking}.
+	- Basic behaviors
+		- walk in the direction that its facing
+		- walk until it hits an obstacle, and then it will change direction
+		- patrolling behavior, left to right within bounds/range.
+		- running and jumping
+		- flying (in a direction, oscillating, etc.).
+	-Sensing
+		the ai is trying to be aware of whats going on around it.
+		- distance to the player
+		- direction of the player
+		- pit and obstacle avoidance
+
+		for distance to the player, you can just do some basic algebra to see
+		if its under or within a certain bounds that you would consider close
+
+		for direction of player, with 2d game this is pretty straight forward
+		thankfully. we can simply say, is the players position x lesser or greater
+		than mine.
+
+		for pit avoidance gets very interesting. we already have collision flags,
+		but we're gonna do something else. What we are going to do is we are going
+		to add a point to the left and right of them, just below their feet, to see
+		if they are just on the edge of a pit or not. what this means is that we
+		are going to check if there is no collision on the point, and once it is not
+		colliding with soemthing, that means that there is a pit there. so maybe we
+		would want it to change direction or something.
+
+	- Let's research!!!
+		we're gonna look at different games and see what they do with their ai, and 
+		what their various behaviors are.
+
+
+2) Super Mario
+
+	- right now we are going to look at a goomba, it is very simple ai, they will
+		not chase after him, they will only move left to right and change direction
+		when they hit something. one of their states is being killed (squished).
+	- Now we're looking at a koopa troopa, they have a couple of different states.
+		when you jump on them, they just become a shell. and after a little while
+		they will turn back into the enemies. but they can also turn into the sliding
+		state, which means that they can be used to take out other enemies. but other
+		than that they usually just move left to right.
+
+
+3) Ice Climber
+
+	- The enemies just simply walking state, and when they see a problem (a hole
+		in the floor) they will switch to a different state where they walk
+		faster and try to fill in the floor. 
+
+
+4) Gradius
+
+	- the ai has a pattern that they fly in. but other wills try and chase you.
+		and once they are hit with a laser they will change to their killed
+		state. there's a whole lot of different stuff going on. and part of the
+		game is learning which ai do what. not all ai need to chase after 
+		sometimes just flying randomly is really effective on its own.
+
+
+5) Coding Part 1
+
+	- basically all we did was just set up our environment and get it ready to put
+	 AI into the environment. We did this by changing the amount of platforms on 
+	 the screen and then we started George a little bit lower and left of where
+	 he was originally.
+
+6) Coding Part 2
+
+	- we inserted an enemy into the environment, made a new entity for him, and 
+		then rendered him into the scene. Now we just need to make him do something
+
+
+7) Coding Part 3
+
+	- we made an enum for ai type, ai states, and entitytype. we made separate
+		functions for ai walker and ai type, so that it will update what they do.
+		but we haven't added gravity to them or collision checks yet.
+
+
+8) Coding Part 4
+
+	- So what we did was added some new things for the ai states and aitype 
+		functions. we added some switch cases which is kinda cool. professor 
+		described it as kind of a library for different entities and enemies. you
+		can have a multitude of different actions for different things and you 
+		can keep track of all of them here like this. we then updated the parameters
+		for these functions as well as for update so that it would also take in the
+		pointer to the player, this is so that we can have collision checks and 
+		check for other things as well.
+
+
+9) Coding Part 5
+
+	- so what we did was we were able to make the ai stay in an IDLE state until
+		the player go close enouhg, once the player got close  enough, we made the ai
+		move twoarsd the direction of the player, (if thep layer was to the left of
+		the ai then it would move towards the left, if it was right move to teh right).
+		But what we need to do now is make sure to do collision checks between the
+		player and the ai and also add gravity to the ai.
+
+
+--) Extra AI Issues
+
+	- Sometimes AI can do some weird stuff and one of the things that may happen is
+		whenever you want the AI to be able to collide with eachother, you 
+		accidentally check to see if its colliding with itself. This can be relaly
+		bad and make the ai appear as if it is vibrating.
+
+
+10) Level Design
+
+	- In the past video games would come with books, manuals, or sometimes even maps,
+		what we need to do in games nowadays, is to teach the players, how to play
+		without them knowing. Do not make it obvious that its a tutorial. 
+	- Teach the games mechanics through the level design. For example, in zeldas game
+		you learn that going through doors is a good thing. In super mario, they give
+		you a very simple ai in the beginning and as it goes through the levels, the
+		ai will get harder and harder so you learn. 
+	- Illustrate the mechanics of the game in a low stakes environment. Basically
+		if you are learning how to do seomthing, it should be somewhere where its
+		ok to make a mistake. 
+	- Explore your games mechanics through design of the levels. If the game is all
+		about jumping then be creative about how or what he can jump to.
+	- Combine mechanics, this is when players start to feel like they are getting
+		good at your game.Be sure to teach one mechanic at a time or it will be 
+		overwhelming.
+	- Difficulty, sometimes things get too hard too fast. There is a way to control
+		the difficulty curve so that things get more challenging as you play. There
+		is a fine line of balance between making it too hard too fast beacuse
+		it can be frustrating, but if you never find a way to combine the mechanics,
+		then your players will feel like it is boring.
+
+11) Random and Procedural Generation
+
+	- In random generation, sometimes things appear randomly but it doesn't account
+		for what the player has already or what level it is. There's no algorithm
+		its all just random.
+	- An example, dungeons and dragons, basically the idea here is that whatever
+		number you roll on the dice, it whatever will appear and osmetimes its super
+		random and may be overpowered (because maybe the group of players are not
+		that leveled up yet) or it may be underpowered.
+	- Another example, really bad chess, each piece is given to player randomly,
+		you can have sevreal of each piece, it also doesn't account for what the other
+		side got, its just randomly distributed to each player.
+	- You may have a random number generator, or like a universe seed. So you can send
+		it to another person which will be a four bit number. and what will happen is
+		that it will generate the same scene for the other player because that seed was
+		entered into the random number generator.
+	
+	- Procedural generation has a lot of algorithms.
+	- An example, no man's sky, they have 18 quintillion planets, what this means is
+		that it will have a random number generator or seed generator. To get this
+		you would need to use an unsigned long long. For the creatures, they can be
+		built from a lot of different parts and pieces
+	- another example, minecraft, it uses something called perlon noise. What it does
+		is it generates a height map based on noise. It might ask you for a seed, and
+		what it does is it helps you generate an environment. It tries to create a
+		very natural looking environment from this. 
+	- Diablo 3, there are themes that can be seen across each dungeon, and then different
+		hallways are generated to connect each room. It can generate different versions
+		of the dungeon but only parts and pieces of it are random.
+	- Spelunky, a game where you are underground and it is a tile based game. There
+		is an algorithm that generates these levels, tuns of playability because of the
+		randomness of the levels.
+	- Canabalt, endless runner game, you can only jump in this game. to jump off of the
+		building, they do give you a little bit of leeway, and also they make sure that
+		the player is always to the left of the center so that you have alittle bit of
+		time to see what is coming up. the game also does some calculations to make sure
+		that the jump that is generated is something that is possible to do. Its not 
+		always super random where the jump may be imipossible. 
+	
+	- Board Design, signaling, labels and plenty of text help the player with whats 
+		going on.instead of track style, which is like a fixed loop (thing monopoly),
+		there is also grid style (like clue), where you can omve around anywhere. or
+		standard like chess or checkers. There are also some other crazy things like
+		three person chess or a circular board. Or sometimes you can take something to
+		another dimension, like a 3 dimensional chess. whenever you are playing games
+		think about whats going on and see what they are doing and think about what you
+		can do in your own games.
+
+
+Rise of the AI Project:
+
+	
