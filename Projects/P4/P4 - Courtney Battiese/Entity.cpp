@@ -40,12 +40,12 @@ void Entity::CheckCollisionsY(Entity* objects, int objectCount)
         if (CheckCollision(object))
         {
             if (object->entityType == ENEMY) {
-                if (velocity.x > 0) {
-                    velocity.x = 0;
+                if (velocity.y > 0) {
+                    velocity.y = 0;
                     collidedTop = true;
                 }
-                else if (velocity.x <= 0) {
-                    velocity.x = 0;
+                else if (velocity.y < 0) {
+                    velocity.y = 0;
                     collidedBottom = true;
                     object->isActive = false;
                 }
@@ -187,24 +187,6 @@ void Entity::Update(float deltaTime, Entity* player, Entity* platforms, int plat
         jumpTime += deltaTime;
         AI(player);
     }
-    else if (entityType == PLAYER) {
-
-        if (CheckCollision(finalFlag))
-        {
-            gameOver = true;
-            successful = true;
-        }
-
-        CheckCollisionsY(enemies, enemyCount);
-        CheckCollisionsX(enemies, enemyCount);
-
-        if (objectCollided != NULL && objectCollided->entityType == ENEMY) {
-            if (collidedTop || collidedRight || collidedLeft) {
-                gameOver = true;
-                successful = false;
-            }
-        }
-    }
 
     if (animIndices != NULL) {
         if (glm::length(movement) != 0) {
@@ -239,6 +221,28 @@ void Entity::Update(float deltaTime, Entity* player, Entity* platforms, int plat
 
     position.x += velocity.x * deltaTime; // Move on X
     CheckCollisionsX(platforms, platformCount);// Fix if needed
+
+
+    if (entityType == PLAYER) {
+
+        if (CheckCollision(finalFlag))
+        {
+            gameOver = true;
+            successful = true;
+            return;
+        }
+
+        CheckCollisionsY(enemies, enemyCount);
+        CheckCollisionsX(enemies, enemyCount);
+
+        if (objectCollided != NULL && objectCollided->entityType == ENEMY) {
+            if (collidedTop || collidedRight || collidedLeft) {
+                gameOver = true;
+                successful = false;
+                return;
+            }
+        }
+    }
 
     modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, position);
