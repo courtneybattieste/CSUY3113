@@ -39,17 +39,29 @@ void Entity::CheckCollisionsY(Entity* objects, int objectCount)
 
         if (CheckCollision(object))
         {
-            float ydist = fabs(position.y - object->position.y);
-            float penetrationY = fabs(ydist - (height / 2.0f) - (object->height / 2.0f));
-            if (velocity.y > 0) {
-                position.y -= penetrationY;
-                velocity.y = 0;
-                collidedTop = true;
+            if (object->entityType == ENEMY) {
+                if (velocity.x >= 0) {
+                    velocity.x = 0;
+                    collidedRight = true;
+                }
+                else if (velocity.x <= 0) {
+                    velocity.x = 0;
+                    collidedLeft = true;
+                }
             }
-            else if (velocity.y < 0) {
-                position.y += penetrationY;
-                velocity.y = 0;
-                collidedBottom = true;
+            else {
+                float ydist = fabs(position.y - object->position.y);
+                float penetrationY = fabs(ydist - (height / 2.0f) - (object->height / 2.0f));
+                if (velocity.y > 0) {
+                    position.y -= penetrationY;
+                    velocity.y = 0;
+                    collidedTop = true;
+                }
+                else if (velocity.y < 0) {
+                    position.y += penetrationY;
+                    velocity.y = 0;
+                    collidedBottom = true;
+                }
             }
             objectCollided = object;
         }
@@ -64,19 +76,32 @@ void Entity::CheckCollisionsX(Entity* objects, int objectCount)
 
         if (CheckCollision(object))
         {
-            float xdist = fabs(position.x - object->position.x);
-            float penetrationX = fabs(xdist - (width / 2.0f) - (object->width / 2.0f));
-            if (velocity.x > 0) {
-                position.x -= penetrationX;
-                velocity.x = 0;
-                collidedRight = true;
+            if (object->entityType == ENEMY) {
+                if (velocity.x >= 0) {
+                    velocity.x = 0;
+                    collidedRight = true;
+                }
+                else if (velocity.x <= 0) {
+                    velocity.x = 0;
+                    collidedLeft = true;
+                }
             }
-            else if (velocity.x < 0) {
-                position.x += penetrationX;
-                velocity.x = 0;
-                collidedLeft = true;
+            else {
+                float xdist = fabs(position.x - object->position.x);
+                float penetrationX = fabs(xdist - (width / 2.0f) - (object->width / 2.0f));
+                if (velocity.x > 0) {
+                    position.x -= penetrationX;
+                    velocity.x = 0;
+                    collidedRight = true;
+                }
+                else if (velocity.x < 0) {
+                    position.x += penetrationX;
+                    velocity.x = 0;
+                    collidedLeft = true;
+                }
             }
             objectCollided = object;
+
         }
     }
 }
@@ -169,8 +194,8 @@ void Entity::Update(float deltaTime, Entity* player, Entity* platforms, int plat
             successful = true;
         }
 
-        CheckCollisionsX(enemies, enemyCount);
         CheckCollisionsY(enemies, enemyCount);
+        CheckCollisionsX(enemies, enemyCount);
 
         if (objectCollided != NULL && objectCollided->entityType == ENEMY) {
             if (collidedBottom) {
