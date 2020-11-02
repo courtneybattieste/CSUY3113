@@ -117,6 +117,8 @@ void Initialize() {
 
     state.player->jumpPower = 4.8f;
 
+
+    //platforms
     state.platforms = new Entity[PLATFORM_COUNT];
 
     GLuint platformTextureID = LoadTexture("platformPack_tile001.png");
@@ -137,8 +139,7 @@ void Initialize() {
         index++;
     }
 
-
-
+    //starter platform
     GLuint starterPlatformTextureID = LoadTexture("platformPack_tile025.png");
     state.platforms[26].position = glm::vec3(4.5, 2, 0);
 
@@ -152,6 +153,7 @@ void Initialize() {
     }
 
 
+    //finish flag
     GLuint finishFlagTextureID = LoadTexture("finish_flag.png");
     state.finishFlag = new Entity();
     state.finishFlag->entityType = FINISH;
@@ -161,7 +163,7 @@ void Initialize() {
     state.finishFlag->Update(0, NULL, NULL, 0, NULL, 0, NULL);
 
 
-
+    //enemies
     state.enemies = new Entity[ENEMY_COUNT];
     GLuint enemyTextureID = LoadTexture("Sprite_enemy_scorpion.png");
 
@@ -183,8 +185,6 @@ void Initialize() {
         state.enemies[i].animRows = 4;
         state.enemies[i].acceleration = glm::vec3(0, -9.81f, 0);
         state.enemies[i].animIndices = state.enemies->animRight;
-
-        //state.enemies[i].height = .9;
     }
 
     state.enemies[0].position = glm::vec3(-.75, 2.75, 0);
@@ -263,7 +263,9 @@ float accumulator = 0.0f;
 
 void Update() {
 
-    if (state.gameOver) return;
+    if (state.gameOver) {
+        return;
+    }
 
     float ticks = (float)SDL_GetTicks() / 1000.0f; //first we get how much time has passed
     float deltaTime = ticks - lastTicks;
@@ -275,15 +277,14 @@ void Update() {
         return;
     }
 
-
     while (deltaTime >= FIXED_TIMESTEP) {
         // Update. Notice it's FIXED_TIMESTEP. Not deltaTime
-
-        state.player->Update(FIXED_TIMESTEP, state.player, state.platforms, PLATFORM_COUNT, state.enemies, ENEMY_COUNT, state.finishFlag);
-
+       
         for (int i = 0; i < ENEMY_COUNT; i++) {
             state.enemies[i].Update(FIXED_TIMESTEP, state.player, state.platforms, PLATFORM_COUNT, state.enemies, ENEMY_COUNT, state.finishFlag);
         }
+        
+        state.player->Update(FIXED_TIMESTEP, state.player, state.platforms, PLATFORM_COUNT, state.enemies, ENEMY_COUNT, state.finishFlag);
 
         deltaTime -= FIXED_TIMESTEP;
     }

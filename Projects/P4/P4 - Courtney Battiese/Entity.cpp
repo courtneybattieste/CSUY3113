@@ -42,11 +42,11 @@ void Entity::CheckCollisionsY(Entity* objects, int objectCount)
             if (object->entityType == ENEMY) {
                 if (velocity.x > 0) {
                     velocity.x = 0;
-                    collidedRight = true;
+                    collidedTop = true;
                 }
                 else if (velocity.x <= 0) {
                     velocity.x = 0;
-                    collidedLeft = true;
+                    collidedBottom = true;
                     object->isActive = false;
                 }
             }
