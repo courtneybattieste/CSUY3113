@@ -40,13 +40,14 @@ void Entity::CheckCollisionsY(Entity* objects, int objectCount)
         if (CheckCollision(object))
         {
             if (object->entityType == ENEMY) {
-                if (velocity.x >= 0) {
+                if (velocity.x > 0) {
                     velocity.x = 0;
                     collidedRight = true;
                 }
                 else if (velocity.x <= 0) {
                     velocity.x = 0;
                     collidedLeft = true;
+                    object->isActive = false;
                 }
             }
             else {
@@ -198,10 +199,7 @@ void Entity::Update(float deltaTime, Entity* player, Entity* platforms, int plat
         CheckCollisionsX(enemies, enemyCount);
 
         if (objectCollided != NULL && objectCollided->entityType == ENEMY) {
-            if (collidedBottom) {
-                objectCollided->isActive = false;
-            }
-            else if (collidedTop || collidedRight || collidedLeft) {
+            if (collidedTop || collidedRight || collidedLeft) {
                 gameOver = true;
                 successful = false;
             }
