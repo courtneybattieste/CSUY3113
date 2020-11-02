@@ -132,11 +132,11 @@ void Initialize() {
     }
 
     index = 0;
-    for (int i = 19; i < PLATFORM_COUNT-1; i++) {
+    for (int i = 19; i < PLATFORM_COUNT - 1; i++) {
         state.platforms[i].position = glm::vec3(-2 + index, 1.5, 0);
         index++;
     }
-    
+
 
 
     GLuint starterPlatformTextureID = LoadTexture("platformPack_tile025.png");
@@ -147,32 +147,32 @@ void Initialize() {
         state.platforms[i].entityType = PLATFORM;
         state.platforms[i].textureID = platformTextureID;
         //state.platforms[i].height = .95;
-        state.platforms[i].width = .9;
-        state.platforms[i].Update(0, NULL, NULL, 0);
+        //state.platforms[i].width = .9;
+        state.platforms[i].Update(0, NULL, NULL, 0, NULL, 0, NULL);
     }
 
-    
+
     GLuint finishFlagTextureID = LoadTexture("finish_flag.png");
     state.finishFlag = new Entity();
     state.finishFlag->entityType = FINISH;
     state.finishFlag->position = glm::vec3(-4.5, -3, 0);
     state.finishFlag->textureID = finishFlagTextureID;
     state.finishFlag->width = .7;
-    state.finishFlag->Update(0, NULL, NULL, 0);
+    state.finishFlag->Update(0, NULL, NULL, 0, NULL, 0, NULL);
 
 
-    
+
     state.enemies = new Entity[ENEMY_COUNT];
     GLuint enemyTextureID = LoadTexture("Sprite_enemy_scorpion.png");
-   
+
 
     for (int i = 0; i < ENEMY_COUNT; i++) {
         state.enemies[i].entityType = ENEMY;
         state.enemies[i].textureID = enemyTextureID;
         state.enemies[i].speed = .7;
         state.enemies[i].width = .6;
-        //state.enemies[i].height = 0.8f;
-  
+        state.enemies[i].height = 0.4f;
+
         state.enemies[i].animRight = new int[6]{ 18, 19, 20, 21, 22, 23 };
         state.enemies[i].animLeft = new int[6]{ 12, 13, 14, 15, 16, 17 };
 
@@ -203,7 +203,7 @@ void Initialize() {
     state.enemies[2].aiType = JUMPER;
     state.enemies[2].aiState = JUMPING;
 
-    
+
 }
 
 void ProcessInput() {
@@ -213,27 +213,27 @@ void ProcessInput() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
-            case SDL_QUIT:
-            case SDL_WINDOWEVENT_CLOSE:
-                gameIsRunning = false;
-                break;
+        case SDL_QUIT:
+        case SDL_WINDOWEVENT_CLOSE:
+            gameIsRunning = false;
+            break;
 
         case SDL_KEYDOWN:
             state.gameStart = false;
             switch (event.key.keysym.sym) {
-                case SDLK_LEFT:
-                    // Move the player left
-                    break;
+            case SDLK_LEFT:
+                // Move the player left
+                break;
 
-                case SDLK_RIGHT:
-                    // Move the player right
-                    break;
+            case SDLK_RIGHT:
+                // Move the player right
+                break;
 
-                case SDLK_SPACE:
-                    if (state.player->collidedBottom) {
-                        state.player->jump = true;
-                    }
-                    break;
+            case SDLK_SPACE:
+                if (state.player->collidedBottom) {
+                    state.player->jump = true;
+                }
+                break;
             }
             break; // SDL_KEYDOWN
         }
@@ -269,27 +269,25 @@ void Update() {
     float deltaTime = ticks - lastTicks;
     lastTicks = ticks;
 
-    deltaTime += accumulator; 
+    deltaTime += accumulator;
     if (deltaTime < FIXED_TIMESTEP) {
         accumulator = deltaTime;
         return;
     }
-    
+
 
     while (deltaTime >= FIXED_TIMESTEP) {
         // Update. Notice it's FIXED_TIMESTEP. Not deltaTime
 
-        state.player->Update(0, state.player, state.finishFlag, 1);
-        state.player->Update(0, state.player, state.enemies, ENEMY_COUNT);
-        state.player->Update(FIXED_TIMESTEP, state.player, state.platforms, PLATFORM_COUNT);      
+        state.player->Update(FIXED_TIMESTEP, state.player, state.platforms, PLATFORM_COUNT, state.enemies, ENEMY_COUNT, state.finishFlag);
 
         for (int i = 0; i < ENEMY_COUNT; i++) {
-            state.enemies[i].Update(FIXED_TIMESTEP, state.player, state.platforms, PLATFORM_COUNT);
+            state.enemies[i].Update(FIXED_TIMESTEP, state.player, state.platforms, PLATFORM_COUNT, state.enemies, ENEMY_COUNT, state.finishFlag);
         }
 
         deltaTime -= FIXED_TIMESTEP;
     }
-    
+
 
     accumulator = deltaTime;
     state.gameOver = state.player->gameOver;
@@ -375,7 +373,7 @@ void Render() {
         DrawText(&program, fontTexture, "Kill enemies by jumping on them", .43, -0.20f, glm::vec3(-3.25, 0, 0));
     }
 
-    if (state.gameOver) 
+    if (state.gameOver)
     {
         if (state.successful) {
             bool allGone = true;
@@ -384,8 +382,8 @@ void Render() {
                     allGone = false;
             }
 
-            if(allGone)
-                DrawText(&program, fontTexture, "You Win!", .75, -0.33f, glm::vec3(-2.0, 0, 0));
+            if (allGone)
+                DrawText(&program, fontTexture, "You Win!", .75, -0.33f, glm::vec3(-1.0, 0, 0));
             else
                 DrawText(&program, fontTexture, "You Lose, Didn't Kill All Enemies", .5, -0.23f, glm::vec3(-4.15, 0, 0));
         }
@@ -415,4 +413,3 @@ int main(int argc, char* argv[]) {
     Shutdown();
     return 0;
 }
-

@@ -11,9 +11,9 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
 
-enum EntityType {PLAYER, PLATFORM, ENEMY, FINISH};
-enum AIType {WALKER, WAITANDGO, JUMPER};
-enum AIState {IDLE, WALKING, JUMPING};
+enum EntityType { PLAYER, PLATFORM, ENEMY, FINISH };
+enum AIType { WALKER, WAITANDGO, JUMPER };
+enum AIState { IDLE, WALKING, JUMPING };
 
 class Entity {
 public:
@@ -70,7 +70,7 @@ public:
     void CheckCollisionsY(Entity* objects, int objectCount);
     void CheckCollisionsX(Entity* objects, int objectCount);
 
-    void Update(float deltaTime, Entity* player, Entity* platforms, int platformCount);
+    void Update(float deltaTime, Entity* player, Entity* platforms, int platformCount, Entity* enemies, int enemyCount, Entity* finalFlag);
     void Render(ShaderProgram* program);
     void DrawSpriteFromTextureAtlas(ShaderProgram* program, GLuint textureID, int index);
 

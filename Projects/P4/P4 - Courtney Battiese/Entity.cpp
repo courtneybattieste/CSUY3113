@@ -83,7 +83,7 @@ void Entity::CheckCollisionsX(Entity* objects, int objectCount)
 
 void Entity::AIWalker() {
 
-    if (position.x <= -4.75){ //Move Right
+    if (position.x <= -4.75) { //Move Right
         movement = glm::vec3(.75, 0, 0);
         animIndices = animRight;
     }
@@ -95,22 +95,22 @@ void Entity::AIWalker() {
 
 void Entity::AIWaitAndGo(Entity* player) {
     switch (aiState) {
-        case IDLE:
-            if (glm::distance(position, player->position) < 3.0f) {
-                aiState = WALKING;
-            }
-            break;
+    case IDLE:
+        if (glm::distance(position, player->position) < 3.0f) {
+            aiState = WALKING;
+        }
+        break;
 
-        case WALKING:
-            if (player->position.x < position.x) { //move to the left
-                movement = glm::vec3(-.75, 0, 0);
-                animIndices = animLeft;
-            }
-            else {
-                movement = glm::vec3(.75, 0, 0); //otherwise move to the right
-                animIndices = animRight;
-            }
-            break;
+    case WALKING:
+        if (player->position.x < position.x) { //move to the left
+            movement = glm::vec3(-.75, 0, 0);
+            animIndices = animLeft;
+        }
+        else {
+            movement = glm::vec3(.75, 0, 0); //otherwise move to the right
+            animIndices = animRight;
+        }
+        break;
     }
 }
 
@@ -119,7 +119,7 @@ void Entity::AIJumper() {
     if (jumpTime >= 2.5f)
         jump = true;
 
-    if(position.x <= -4.75) { //Move Right
+    if (position.x <= -4.75) { //Move Right
         movement = glm::vec3(.75, 0, 0);
         animIndices = animRight;
     }
@@ -133,22 +133,22 @@ void Entity::AIJumper() {
 
 void Entity::AI(Entity* player) {
     switch (aiType) {
-        case WALKER:
-            AIWalker();
-            break;
+    case WALKER:
+        AIWalker();
+        break;
 
-        case WAITANDGO:
-            AIWaitAndGo(player);
-            break;
+    case WAITANDGO:
+        AIWaitAndGo(player);
+        break;
 
-        case JUMPER:
-            AIJumper();
-            break;
+    case JUMPER:
+        AIJumper();
+        break;
     }
 }
 
 
-void Entity::Update(float deltaTime, Entity* player, Entity* platforms, int platformCount)
+void Entity::Update(float deltaTime, Entity* player, Entity* platforms, int platformCount, Entity* enemies, int enemyCount, Entity* finalFlag)
 {
     if (isActive == false) return;
 
@@ -160,6 +160,27 @@ void Entity::Update(float deltaTime, Entity* player, Entity* platforms, int plat
     if (entityType == ENEMY) {
         jumpTime += deltaTime;
         AI(player);
+    }
+    else if (entityType == PLAYER) {
+
+        if (CheckCollision(finalFlag))
+        {
+            gameOver = true;
+            successful = true;
+        }
+
+        CheckCollisionsX(enemies, enemyCount);
+        CheckCollisionsY(enemies, enemyCount);
+
+        if (objectCollided != NULL && objectCollided->entityType == ENEMY) {
+            if (collidedBottom) {
+                objectCollided->isActive = false;
+            }
+            else if (collidedTop || collidedRight || collidedLeft) {
+                gameOver = true;
+                successful = false;
+            }
+        }
     }
 
     if (animIndices != NULL) {
@@ -195,21 +216,6 @@ void Entity::Update(float deltaTime, Entity* player, Entity* platforms, int plat
 
     position.x += velocity.x * deltaTime; // Move on X
     CheckCollisionsX(platforms, platformCount);// Fix if needed
-
-    
-    if ((collidedTop || collidedRight || collidedLeft) &&
-        objectCollided->entityType == ENEMY) {
-        gameOver = true;
-        successful = false;
-    }
-    else if (collidedBottom && objectCollided->entityType == ENEMY) {
-        objectCollided->isActive = false;
-    }
-    else if ((collidedBottom || collidedLeft || collidedRight || collidedTop) &&
-        objectCollided->entityType == FINISH) {
-        gameOver = true;
-        successful = true;
-    }
 
     modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, position);
