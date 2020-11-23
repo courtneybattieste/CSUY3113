@@ -1,0 +1,282 @@
+Week 9 Notes
+
+
+1) Platformer Levels (Tilesets and Tilemaps)
+
+	- for example, in super mario bros, the entire map is made up of tiles and tilemaps.
+	- same with legend of zelda, it may not be as obvious however its easy to see that everything
+		is made from tiles and the characters are one tile big.
+	- spelunky is a newer game thats made from tiles. the larger blocks can be made from a 
+		combination of the smaller tiles.
+
+
+2) Tileset
+	- its just a texture or image containing all of the tiles that you may use in your game
+		very similar to a sprite sheet except it contains all of the tiles.
+	- we're gonna need to find the coordinates of the invidual tile that we need.
+
+
+3) Tilemap
+	- indices of the individual tiles that we have. its an array with the indicies of the 
+		tiles that we want to use.
+	- this map will fit into a grid. and it made entirely of tiles. Tile set will contain
+		every square of texture that we want.
+	- the tilemap will contain an array of the list of the indicies of what tile i want to 
+		go where. it can go through the array and pritn out what tile it is that i want there.
+	- it could be a one dimensional array, or a two dimensional array. 
+
+
+4) Building and Rendering
+
+	- Now we need to uild the map and render. We build a list of vertices and texture
+		coordinates and then draw the level as one object. Very similar to drawing
+		monospaced fonts. We had this texture with all the different individual characters.
+		It's going to be a very similar process.
+
+	- We're going to need another file, its a width in tiles. how big on the texture map is
+		the tile and how many tiles are there on the texture map.
+
+	- Map.cpp we're going to call build so that it can build the tile map. The code in here
+		is sgoing to be very similar to the code in the text. 
+		And we're going to have soem code to render it, so that we can build it.
+	- We're going to make somem updates to the main.cpp so that we can add a map.
+	- We're also going to update a little bit of update and render
+
+
+5) Coding Part 1
+
+	- basically what we did was that we added a tileset to our programs' folder
+		and then we commented out the enemies update and rendering because
+		we don't want to have to interact with them right now.
+
+6) Coding part 2
+
+	- we created a mapp.cpp file and a map.h file and we copied and pasted it into our program
+
+7) Coding part 3
+
+	- we deleted a lot of things in our main.cpp file. we deleted everything having to do with 
+		platforms and more or lesss replaced it with a map object.
+
+8) Coding part 4
+	- so we have added some map dimensions at the top and we have added a map declaration to
+		the bottom of initialize.
+
+9) Coding part 5
+
+	- so what we can do now is that our map is rendered and we can see it. we can also change it
+		at will depending on what numbers we put into the array. the only thing is that there
+		is no collision detectiong, so our character will just fall straight through.
+
+
+10) Tilemap collisions
+
+	- we need to check for collisions
+	- first step: convert our entity (palyer/ai) position to the grid coordinates of the 
+		tilemap and check if a tile is there.
+	- we need to be sure that we are not reading something larger than our array or anything
+		negative. need to make sure you are not trying to read outside the bounds of the 
+		tilemap or something wayy to the left.
+	- you may want to use the number 0, this might mean not solid. maybe u have a tile that
+		is water or a background element. maybe something that your character can just
+		walk past but it is still drawn into the background. 
+	- for this, we have a function called isSolid that will determine whether the thing that
+		the player is collided with is solid or not, it will also calculate penetration so that
+		it can adjust the player by that amount if there is something solid at that position.
+		if anything is out of bounds, we are jsut oging to say that there is nothing there
+		We are trying to see which tile is there and if the tile is zero then there is nothing
+		there. or maybe all of your tiles under index 10 are things that you're player can walk
+		through. if there is seomthing solid then it will jsut return true.
+	- we are going to update entity.h checkcolissionsX(map).
+	
+	- instead of colliding with out platforms, we areoing to check collisions against the map
+		we are going to checkcollisions for y, this will see whether we are partially ona ledge
+		or not. and you can see how this works.
+	- we can see whether the sensor or not is colliding with the map. they have 6, four on
+		every corner and then two ont op middle and bottom middle. 
+	- we can also check for collisions on the x as well. we can add other ones if we want
+		to as well. you can add sensors if you want. 
+	- we are going to update the code we have to put in collision checking with the tilemap
+
+
+
+11) Coding part 1
+
+	- so we finally added collisions detection by adding two new function that detect
+		collisions with the map. the only thing now is that we need a way for the map to 
+		side scroll so that we dont have to be stuck on the same frame of map. so what we are
+		going to do now is leran how to codein the rest of the map and how to make sure that
+		the map is somewhat centered at the character.
+
+
+12) Sidescrolling
+
+	- we need to scroll as the player moves. Most of the time, the genre of the game is based
+		on the camera. all games (first person, third person, over the shoulder, top down) all
+		describe how the camera or where it is placed. we need to be able to scroll accross
+		our view. We are translating everything so that the player is at the center of
+		the screen. it might be a little weird to thing about. we are basically sliding
+		things into it and our window is a fixed thing, we are moving our world past the
+		camera. we translate things into view, the camera is not moving. 
+	- for this we have something know as the view matrix. and by default it is not doing anything
+		it has just been the identity matrix the entire time. we are going to translate the
+		view matrix and set it at render. if the player is moving to the right, we are oging to
+		be sliding the world to the left to get it into view. it is a transformationt hat is 
+		happening when we are drawing things, its reverse of what the player is doing becayse
+		it is oving things into view. 
+	- we're gonna code some sidescrolling and we are going to see how it works.
+
+
+13) Coding part 1
+
+	- what we did was we updated the viewmatrix so that it would move the opposite way
+		that the player was moving, we did this in update, and then in render we made
+		sure to set the viewmatrix to the updated viewmatrix.
+	- this was really cool because we can see that george is moving around and there was
+		more map there than what i originally thought.
+
+
+14) Let's get Organized!
+
+	-our file has a lot of code in it so lets move some code around.
+	- we are oging to need to load texture and display text in a lot of different places
+		so instead of having main.cpp responsible for this, let's move this into another 
+		file.
+	- we are going to create a new file called util.h, we will havel oadtexture and loadtext
+		into this class. and we are aslo going to have a util.cpp which will have the meat of
+		these functions. we also need to add util.h to main.cpp and remove include froma lot
+		of files which will be nice. its a little bit of cleanup. whenever we want to call 
+		texture we can just loadtexture no need to instantiate the clas.
+	- so we are going to do that now..
+
+
+15) Coding part 1
+
+	- so what we did was added util.h and util.cpp and we moved load texture and draw text
+		into there. for now it was only load texture because we didn't have a draw text in
+		the thing yet. also we deleted a couple include and made sure to include util.h
+		into our main cpp. it still works exactly the same now its just less cluttered in
+		main cpp.
+
+
+16) Updated Map
+
+	- we are going to update the map, player start position and view matrix. we want to make
+		it to where if the player moves too far to the left, the camera will stop following
+		thep layer. its very subtle but it justindicates that the player has reached the end
+		of the level. we are going to change our player position, so that the player starts
+		a little bit into the map, we are also going to change the view matrix so that its
+		going to be looking a little more down into it. 
+
+
+
+17) Coding part 1
+
+	- so we added a new map to our program and when you walk, you can see that when you get
+		to a certain point (all the way to the right side of the map), the camera still
+		follows you and you are able to see that there is no map beyond that point, however
+		you don't want to see that, so you want to make it to where the camera will stop 
+		moving once you reach a certain point of the map so that you are n't able to see the
+		end of the map.
+
+
+18) Coding part 2
+
+	- we also want to make it to where the camera ends up being fixed if you go past a certain
+		point, so what we did was we updated some code in our main update. its a very subtle
+		thing but it tells the player without telling them that they have reached the end of 
+		the map.
+
+
+19) Game Modes
+
+	- also known as scenes, you might have a main menu, a win screen. for the platformer
+		project, you need to have a main menu, a level 1, 2, and 3. What we're going to do
+		is create a scene class and erive a mainmenu level 1, 2, and 3. so we can have a list
+		of scenes, and then have a pointer to whatever scene we want to show. what we are
+		going to do is create a scene.h and then we are going to have a scene.cpp. so what we
+		are going to do now is create these two files and make a scene.
+
+
+20) Coding part 1
+
+	- we bascially just copied and pasted the scene. h and scene.cpp. nothing has changed
+		yet so far, we hae only created the foundation for it to change int he future.
+
+
+21) Level1
+
+	- we dn't instantiate a scene, we derive from it. so we are going to create a class
+		level1.h and level1.cpp. its going to inheret from scene.h. we are going to move
+		over all of the level data and move it out of main. we will have an initialization
+		function where we can load a tile set and it will create a player, create enemies
+		and it will clean it up so that it won't all be in main. the update can update
+		the player, maybe later it can update enemies and such, and then it will render
+		the map and render the player. 
+	- we need to add headers and we need to add pointers to our scene,a nd then we need
+		to create a method that will be able to swtich scenes easily so that we can move
+		to level2 eventually.
+	- whats interesting is that the gamestate is now part of the scene. we are going to 
+		tell the current scene to update the players and enemies and then we are oging
+		to tell the current scene to render. this means we are going to have to abstract
+		a lot of things. but basicaly we put a lot of responsibility on the scenes.
+
+22) Coding part 1
+	- we added scene.cpp and scene.h and were able to delete a lot of stuff from main cpp
+		and just move it from the main to those files. nothing changed on the screen
+		except now we are able to make more levels without a lot of work being done.
+
+
+23) Level2
+
+	- what we can do is copy the code from level1 to level2 and change the tilemap
+		so that wwe know we are somewhere different. 
+	- we also need a way to swtich between these two scenes, so we need a way to indicate
+		that we are at the end of the level and ready to go to the next one.
+	- so inside of main.cpp we are going to have an array of scenes. 
+	- we also need a variable called next scene, so that if nextscene is -1, that means
+		dont switch yet, but if it is something idfferent (0 or more), its time to swtich
+
+24) Coding part 1
+
+	- so basically what we did was we copied and psted the code from level1 into level2
+		but just renamed everything so that it had the name leve2, and then we slightly
+		cahnged the map by having the ground be bricks instead of grass. but now what
+		we need to do next is change stuff in our main function so that it can be bale
+		to switch between the two scenes.
+
+
+25) Coding part 2
+
+	- so now we have included level2 in our main cpp and we have created a list of 
+		scenes, and we have a way where we can input directly what scene we want to 
+		start on. but we still need an indicator that can switch these scenes 
+		automatially without it being needed to be input. 
+
+
+26) Coding part 3
+
+	- so what we did was that when we reached a certain point, we switched to the next
+		scene, but maybe what you want to do is that when you reach a collide with a 
+		certain object. maybe then you can move onto the next scene.
+
+
+
+Project Platformer
+
+	- what we want to do is meet the requirements in the description. you definitely 
+		want to start this project sooner than you want to. start right away.
+	- Have a main menu and display name of hte game, and then press a key to start level
+	-you need to have 3 levels, they don't need to be complicated or super long, but they
+		do at least need to scroll.
+	- the player needs to have three lives, if they lose all lives, they need to lose
+	- if they get to the end of all three levels, they need to win
+	- there also needs to be at least one type of moving ai and there needs to be multiple
+		(it would be nice if they had multiple behaviors)
+	- if they player touches the ai, they need to die, but it can be ok if they collide
+		with the bottom of it.
+	- needs to have one looping music and one sound effect. 
+		(it might be more fun to have one music for main menu and one for game)
+	- just make sure you meet the requirements.
+	- you are allowed to use whatever artwork you find and whatever music you find.
+	- if you have any questions let him know.
