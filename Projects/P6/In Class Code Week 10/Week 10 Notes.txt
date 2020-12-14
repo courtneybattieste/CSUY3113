@@ -1,0 +1,175 @@
+Week 10
+
+1) Special Effect
+
+	- we can add some simple special effects to our game. We can do this
+		by overlaying a large square over the entire window and then change
+		its transparency. This will simulate fading in and fading out. We
+		can also shrink it and made it zoom in on things and not.
+	Ex: Fade In, Fade Out, Slide Up, Slide Down, Grow (from center of screen),
+			Shrink
+
+2) Effects Class
+	- we are going to add a new special fx class. It will have a constructor,
+		start, update, and render.
+	Effects.h and Effects.cpp will be added. 
+
+
+3) Coding - Part 1
+
+	- Ok so we added the classes and copied and pasted some stuff over.
+		we also update some thing to our main function. Such as adding effects.
+		and rendering them after we render everything else. But when we press compile
+		nothing changed. and this is because we haven't coded the actual effect yet
+		which is what we are going to do next.
+
+
+4) Coding - Part 2
+
+	- we succesfully implemented a fade in effect. we did this by setting our alpha
+		to one right when the effect starts. (alpha stands for transparency).
+		And then as we are updating it we decrease it by deltatime. Then once we
+		have the alpha less than zero we make sure to just set the effect to none
+		because we don't want to keep decreasing something, drawing the square, and
+		taking up resources. Also in our render function, we are able to manipulate
+		the size of the square and the color of it.
+		Next we are going to do a fade out.
+
+
+5) coding = part 3
+
+	- we got our fadein and fadeout working
+	what we did for this one was we adeded a new variable called effectSpeed
+		which basically effects how fast or slow the effect will be. if effectSpeed
+		is less than 1, than it will go slower, if it is greater than one than it
+		will go faster. We multiplied this by deltaspeed in our update function
+	also in our render function, we just borrowed the same exact code, which we
+		did by not putting a break point and just letting it run on into fadein
+	- we are going to add some more eeffects next.
+
+
+6) Coding part 4
+
+	- so we added a grow and shrink effect. this is basically like there is a 
+		square in the middle of the screen and it either grows and consumes the
+		entire screen or it shrinks and fades into nothing. really good for beginning
+		and ending of levels. we did this by adding another varibales called size
+		so that we know what size of rectangle we want to start with and we grow
+		this rectangle by decrementing it with deltatime * speed or incrementing it
+		with those aforementioned things. the next thing we are going to do is add
+		a camera shake. this is going to be really cool.
+
+
+7) Coding part 5
+
+	- we added a shake effect which was pretty cool. we did this by making a 
+		timeLeft variable which basically tells us how quickly the effect will be
+		over. we also made it to where everytime the character jumps and touches
+		the ground, the entire screen will shake. 
+
+
+8) Shaders
+
+	- we have lots code that uses shaders, but what are they exactly. we're giving
+		shaders quite a bit of stuff. we give vertices (triangles of object), as
+		well as scale, and the viewMatrix which is what dtermines what we are seeing
+		in the screena s well as the projectMtrix to the vertex shader. the vertex
+		shader potioins all of the traingle in the screen and then it will pass things
+		to the fragment shader and actually fills in all the pixels with what its
+		supposed to.
+	- the complete shader program is made from vertex and fragment shader. you need 
+		both to work
+
+	- vertex shader, translates vertices to screen positions. 
+		Ex: program.setProjectionMatrix(projectionMatrix);
+
+	- fragment shader, determines for eah pixel what color to draw, and it might be
+		grabbing apixel from a texture. within the vetices specified by the vrtex 
+		shader.
+
+	- these shaders are moade in somehat c langauge called glsl. 
+	- lets take a closer look at vertex_textured.glsl.
+
+
+
+9) Vertex and Fragment Shaders
+	
+	- glsl language is actually very similar to c langauge. these are the teeny tiny
+		program that run on the cpu and are applied to very vertice and pixel.
+	- we're gonna experiment with effects_texture and fragment_textured to play around
+		with different shaders.
+	- lets open up our program and see with happens with different colors in our shader.
+
+
+10) Coding part 1
+
+	- we added a new file to our shader folder
+
+
+
+11) Coding part 2
+
+	- so basically what we did was we added a new shader function that did a lot of different
+		things are we were able to play around and manipulate the certain color, saturation, and
+		other things. it was actually really cool and you are allowed to switch to diferent
+		shaders dependingg on the situation.
+
+		// ---invert--- 
+	// gl_FragColor = vec4(1.0- color.r, 1.0 - color.g, 1.0-color.b, color.a);
+
+
+	/*
+
+	---grayscale---
+
+	uniform sampler2D diffuse;
+
+	varying vec2 texCoordVar;
+
+	void main() {
+		vec4 color = texture2D(diffuse, texCoordVar);
+		float c = (color.r + color.g + color.b) / 3.0;
+		gl_FragColor = vec4(c, c, c, color.a);
+	}
+
+	*/
+
+
+	/*
+	----more realistic grayscale----
+
+	uniform sampler2D diffuse;
+
+	varying vec2 texCoordVar;
+
+	void main() {
+		vec4 color = texture2D(diffuse, texCoordVar);
+		vec3 luminance = vec3(dot(vec3(0.2126,0.7152,0.0722), color.rgb));
+		gl_FragColor = vec4(luminance, color.a);
+	}
+	*/
+
+
+12) 2D lighting
+
+	- what we can do is make it where, the farther away you are from the light source,
+		the darker it will be. What we are going to do with this is we are going to decrease
+		the pixel's brightness. 
+	- Lit shader, we are going to make some new files for our lit shader so that we can use
+		our new lit qualities. We are also going to add a new variable which distinguishes 
+		the position of the light source and then we are going take the position and pas it 
+		over so that we can calculate the distance of the light and calculate the specific
+		brightness needed to set that pixel at.
+	- We need to add some code so that we can set the position of the light in th shader.
+	- We're gonna update the code in shaderprogram.h and create a new method called setLightPosition
+		this code will let us set the variable inside of the shader code so that we can set
+		the position of th light.
+	- Lets code.
+
+13) Coding part 1
+
+	- we added a lot of new things, but basicallay now we have a sort of light source coming
+		from the main character and wherevert they walk , their surrounding objects are illumated
+		Notice also how things that are solid color, like the background, aren't effected by
+		this only objects in the game that have texture.
+	- very cool.

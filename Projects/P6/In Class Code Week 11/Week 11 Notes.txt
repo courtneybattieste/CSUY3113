@@ -1,0 +1,119 @@
+Week 11 Notes
+
+
+
+1) Introduction to 3D
+
+	- basically stuff is 3d wow.
+
+2) Perspective Projection
+
+	- persepctive projection is where things that are farther away look smaller. for 3D things we also
+		sue a x,y, and z axis instead of just a regular x and y. also u and v are still the same because
+		what we are drawing to the screen is techincally a 2D rendering of a 3D object.
+
+
+3) Drawing a cube
+	- drawing a cube is like the helloworld of the 3D stuff.
+		as z gets closer to the screen it gets positive and as it gets farther away from the screen
+		it gets negative.
+	- also when you rotate things on differenta xises they will look diffrent
+
+
+
+4) Z-Buffer
+	
+	- we need a z buffer for our objects so that we can tell which things are in fron tof one another
+		and which things are not. basically, every pixel is given a depth variable. and when we draw
+		each pixel one by one, it will check if there is already a pixel existing in the spot that
+		a pixel wants to draw over, if the pixel wanting to be drawn has a smaller depth valule than 
+		the one alredy drawn , than that means that theone wanting to be drawn is closer to the screen
+		and will overwrite the one that is already there and takes it spot. if not, then the one that is
+		already there will remain there and draw over the pixel.
+
+	- also theres things in the near plane and the far plane, if you are nearer than a specific value
+		then you wont be drawn and if you are farther than a speicific value, you also won't be drawn.
+		this is what we call our field of vision
+
+
+5) Coding part 1
+
+
+6) Coding part 2
+
+	- first we copied and pasted the vertcies for the cube and the uv coordinates
+		and then we enabled depth func and made sure that everytime we render it we clear the
+		depth buffer. Next we need to create an entity to hold the cube
+
+7) Coding part 3
+	
+	- wow okay so we built this cube. we initialized and updated entity by adding v airbales that are
+		pointers to vertxes and uv corrinadte. now we want to rotate the sube 
+
+8) coding part 4
+
+	- now we have a cube that can rotate anyway that we want
+
+
+9) 3D Models
+
+	- now we want to be able to load more complex things.
+	- if we want to give something a curve we need to add a lot of traingles to simulate a curve.
+		if you have a texture you need to be able to map it to those triangles.
+	- there are various file formats for storing triangles and lists
+	- OBJ is very simple file formate to read, most 3D program can export this format.
+	- lets look at cube.obj file in assets folder in github
+
+	obj file structure
+
+		#this is a comment
+
+		#mtllib - A meterial
+		mtllib  cube.mtl
+
+		#o - the name of a n object
+		o Cube
+
+		#v - A vertex
+		v 1.000000 -1.0000000 -1.000000
+
+		#vt - a texture coordinate
+		vt 1.000000 0.3333333
+
+		#f - A face (they are in groups of 3 because it is a triangle)
+		f 2/1/1 3/2/1 4/3/1
+
+	- loading an objf ile
+
+	mesh.cpp and mesh.h has code that can load one of these files and render
+
+	- we are going to code, we need to grab more 3d stuff so that we can use the mesh
+		- we are going to update entity to have a pointer to stuff and we are going to get rid of all that
+			so that our mesh class can take of everything. its really inc when we put it all together.
+		- we are going to put mario and pikachu on the screen and have fun with that.
+
+
+
+
+
+10) Coding part 1
+
+	- some things might be really big when we add them and also the cernted of the picture might be
+		at their feet. but there is a way that we can scale them and we are going to do that right now
+
+11) Coding part 2
+
+	- we were able tos cale  mario individuallt since he was considerably larder than the rest of the
+		objects. there. now we are going to add a space ship and when there is movement it is going to
+		speed off into the distance.
+
+12) coding part 3
+
+
+
+13) coding part 4
+
+
+14) coding part 5
+
+

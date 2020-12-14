@@ -31,6 +31,7 @@ void MainMenu::Update(float deltaTime) {
 
 void MainMenu::Render(ShaderProgram* program) {
     state.map->Render(program);
+
     Util::DrawText(program, Util::LoadTexture("font2.png"), "i freaking HATE scorpions", .65, -0.30f, glm::vec3(.75, -3, 0));
     Util::DrawText(program, Util::LoadTexture("font2.png"), "Press ENTER to start", .5, -0.20f, glm::vec3(2.25, -6.5, 0));
 }

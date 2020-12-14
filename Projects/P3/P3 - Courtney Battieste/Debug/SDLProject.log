@@ -4,5 +4,6 @@
 C:\Users\court\Documents\School\NYU\3 Sophomore Fall\CSUY3113\Projects\P3\P3 - Courtney Battieste\main.cpp(97,30): warning C4305: '=': truncation from 'double' to 'float'
 C:\Users\court\Documents\School\NYU\3 Sophomore Fall\CSUY3113\Projects\P3\P3 - Courtney Battieste\main.cpp(98,31): warning C4305: '=': truncation from 'double' to 'float'
 C:\Users\court\Documents\School\NYU\3 Sophomore Fall\CSUY3113\Projects\P3\P3 - Courtney Battieste\main.cpp(264,23): warning C4018: '<': signed/unsigned mismatch
+  ShaderProgram.cpp
   Generating Code...
   SDLProject.vcxproj -> C:\Users\court\Documents\School\NYU\3 Sophomore Fall\CSUY3113\Projects\P3\P3 - Courtney Battieste\Debug\Week 5.exe

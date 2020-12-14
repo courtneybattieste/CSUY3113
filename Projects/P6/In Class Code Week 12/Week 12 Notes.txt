@@ -1,0 +1,119 @@
+Week 12 Notes
+
+
+1) 3D Levels
+
+	- (we need a floor)
+	- we can use a cube and scale it to be large along the x and za xis, but small along the y axis. 
+	- Lets code
+		were gonna take a cube and sacle it to be the floor and then take a texture so that it can be
+			added to the scene. it will repeat. all types of things we can do when loding textures.
+
+
+
+2) Codgin part 1
+
+
+3) Coding part 2
+	- we were able to make the floor its texture so that it looks cleaner.
+
+
+4) Moving around
+
+	- its a little bit more complicated in 3D games.
+	- we want to be able to turn and move in the direction we are facing. whenever you are
+		pressing the up button, you want to make sure that the character is moving forawrd
+		in the way that is forward to them, not just straight up all togther.
+	- to do this we are going to be using the unit circle. we can take the cos and sin 
+		value by the way the person is facing and then get the velocity from the way the
+		person is moving.
+	- we need to make some updates to main.cpp A and D will change the way the person is
+		facing. W the forward button, we want to move on the way that the pesron is facing.
+		hitting s will also make you go backwards.
+	-lets code, first we are going to be able to move elft and right, and then we are goin
+		to place some objects in the enfironmen.t
+
+
+
+5) Coding part 1
+
+
+
+6) Coding part 2
+
+
+
+7) Coding part 3
+
+	- so we were able to build our envionrment using a floor texture and add a couple crate,
+		we were also ble to crate a first person pov and be able to move using wasd, ad control
+		the pont of view or the direction that the character is facing and ws control where the
+		person is moving. but we can walk right through the crates which is bad
+
+
+8) 3D collision detection
+	
+	- now we're egonna do the same thing we did with 2d collision but isntead of squres we are going
+		to use cubes now.
+
+	- we're gonna use something called axis-aligned bounding box., we are going to use a box around
+		our player that isnot rotated
+	- we are not going to rotate the box if the player rotates. we're gonna keep the same box. this
+		is easier than handling rotation. much more complicated if we were trying to put a very
+		well fit box aorund the player and the enemy. something we might learn in greater complicated
+		games.
+	- in 2d we had two boxes and calculate the distances between the two cetners and if they were
+		both less than zero, that means that they were colliding. 
+	- all we need to do is calculate the x, y , and z distance to check if they are colliding.
+	- we are going to udpate entity.h, we're gonna try and keep it on the simpler side for this.
+	- we also going to initalize everything to have a hieght of 1. and we're gonna have a check
+		collisoin function that just returns a true of false if it has collided and then we are gong
+		to store the previous position of the entity and if the entity has collided with something
+		we are just going to restore them to that previous position. this is what we will do instead of
+		penetration.
+
+	- lets coe!!!
+
+
+
+9) Coding part 1
+	
+	- so we added colision detection and it wa pretty cool. 
+
+
+10) Billboards
+	- (sprites that always face the camera)
+	- in our 3d worlds, we can have enemies that are 2d images, but its always facing us so
+		thats why we dont need a 3d model of it. 
+	-using billboards, we need 2 triangles and a texture, and we want to rotate it to always
+		face the camera/ the player.
+	-so to the player's field of view, we would never see the side of the thing so it simulates
+		a solid object.
+	- we are going to use the arctan function so that we can get the angleb etween the player and
+		the enemy. if something is a billboard, we want to rotate it so that its facing the player
+	- we need to pass the player inside ofupdate, so that the object can turn towards the player
+	- when we render, we call a special billboard function, otherwise we call the mesh for 3d 
+		objects. and we'll use the onld 2d objects. needs to be png btw so that background is 
+		transparent
+
+
+
+11) Billboards part 2
+
+	- you might see an error caused by the detph buffer and alpha channel. what can happen is if
+		one png is in front of another, if might draw completely transparent pixels so you'll see
+		like this transparent box around one of the enemies and the enemy behind it is invisible
+		or covered with the transparent pixels. to combat this. we need to update our frament
+		shader to ignore transparent pixels. don't draw trsnaparent pixels at all.
+	- lets code, we are going to update our fragment shader so that we can add billboards.
+
+
+
+12) Coding part 1
+
+
+
+13) Coding part 2
+
+
+Projects - Students choice
